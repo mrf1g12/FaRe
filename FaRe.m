@@ -28,14 +28,42 @@ StyleBox[\" \",\nFontSize->14]\)\!\(\*
 StyleBox[\"integrals\",\nFontSize->14]\)\!\(\*
 StyleBox[\".\",\nFontSize->14]\)"];
 
+
+(* °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° *)
+
 PQ::usage =
-	"culo"
+	"PQ[ loopNumber_Integer ]
+
+	PQ returns expression of the Schwinger exponent P/Q after the momentum transformations.
+	It has only one argument: the number of loops.
+	The output is in function of coefficient ac_ij and d_i."
 
 TRed::usage =
-	"culo"
+	"TRed[ D,num,den,loopMomenta]
+	
+	TRed performs the integral reduction of the input integral.
+		\[Bullet] D: is an integer representing the dimension D in which the integral must be computed.
+		\[Bullet] num is a list containing the loop momenta that appear in the numerator of the integral.
+		\[Bullet] den is a list containing the arguments of the propagators, and their relative exponent.
+		  Each propagator must be written without the square. 
+		\[Bullet] loopMomenta is a list containing the loop momenta.
+	"
 
 FIREType::usage =
-	"culo"
+	"FIREType[expr,irr,zeros,fLetter]
+
+	FIREType converts the output of TRed into a form suitable for further computation with FIRE.
+		\[Bullet] expr is a linear combination of scalar integrals as obtained from TRed output. 
+		  It is convenient to remove the tensor structures, even if it is not strictly necessary.
+		\[Bullet] irr is the number of irreducible numerators treated by FIRE. 
+		  Their exponents will be appended to the \[Nu]i\[CloseCurlyQuote]s list treated by TRed and will appear as zeros.
+		\[Bullet] zeros is the list of positions where to insert a zero in the propagator exponent list. 
+		  This can be used if FIRE asks for a list of exponents longer than that used by FaRe, 
+		  for instance because of simplifications.
+		\[Bullet] fLetter specifies the name used to represent the integrals in a suitable way for FIRE.
+	"
+
+(* °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° *)
 
 Begin["`Private`"]
 
