@@ -1,0 +1,82 @@
+SetDirectory[NotebookDirectory[]]; (* Be sure that FaRe.m is in the NotebookDirectory, otherwise, change the path here *)
+
+<< "FeynCalc`" // Quiet
+
+<< FaRe.m
+
+
+Compute Dirac traces
+
+K = DiracSlash[k]
+P = DiracSlash[p]
+Mu = DiracMatrix[mu]
+Nu = DiracMatrix[nu]
+
+DiracTrace[Mu, K, Nu, K + P]
+
+tra = Tr[Mu.K.Nu.(K - P)] /. {mu -> "m1", nu -> "m2", p -> "p"}
+
+
+
+Tensor reduction of vector integral
+
+e1 = TRed[4, {k}, {{k, 1}, {k - p, 1}}, {k}]
+
+(* define here a function to easily change vector index *)
+
+fe1[x_] := e1 /. {"m1" -> x}
+
+Tensor reduction of tensor integral
+
+e2 = TRed[4, {k, k}, {{k, 1}, {k - p, 1}}, {k}]
+
+(* Tensor integral contracted *)
+
+tkk = Contract[MetricTensor["m1", "m2", Dimension -> dim], 
+  ChangeDimension[e2, dim]]
+
+Replace integrals in the trace expression
+
+tra1 = tra /. {(Pair[LorentzIndex["m1"], Momentum[k]] Pair[LorentzIndex["m2"],
+        Momentum[k]]) -> e2}
+
+tra2 = tra1 /. {ScalarProduct[k, "p"] :> 
+    Contract[FourVector["p", "m1"], e1, MetricTensor["m1", "m2"]]}
+
+tra2b = tra2 /. {ScalarProduct[k, k] -> tkk} // Contract
+
+tra3 = tra2b/4 /. {Pair[LorentzIndex[x_], Momentum[k]] :> fe1[x]}
+
+Collect[tra3, MetricTensor["m1", "m2"]] // FullSimplify
+
+
+(* Recognise the input form of the integral labels *)
+
+InputForm[\!\(TraditionalForm\`
+FormBox[
+TemplateBox[{"\"\[ScriptCapitalI]\"",RowBox[{"{", 
+RowBox[{"1", ",", "1"}], "}"}],"6"},
+"Subsuperscript"],
+TraditionalForm]\)]
+
+Analytical expression of the scalar integral Subsuperscript[I, {1,n1}, D]
+
+rr[DD_, n2_] := (-1)^(n2 + 1) Gamma[n2 + 1 - DD/2]/
+   Gamma[n2] y^(n2 - 1) ScalarProduct["p", 
+    "p"]^(DD/2 - n2 - 1)*(y (y - 1))^(DD/2 - n2 - 1)
+
+
+
+
+tra4 = tra3 /. {Subsuperscript["\[ScriptCapitalI]", {1, x_}, y_] :> 
+    rr[y - 2 e, x]}
+
+tra5 = FullSimplify[tra4]
+
+Replace dimension with regulator \epsilon
+
+tra5b = tra5 /. {dim -> 4 - 2 e}
+
+Final result. With trivial manipulation the usual form is recovered.
+
+FullSimplify[tra5b]
