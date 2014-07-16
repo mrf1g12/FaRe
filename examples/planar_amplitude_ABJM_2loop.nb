@@ -1,0 +1,1823 @@
+Planar two-loop amplitude in ABJM
+
+Tensor decomposition with FaRe
+
+SetDirectory[NotebookDirectory[]]
+
+<< "FeynCalc`" // Quiet
+
+<< FaRe.m
+
+(* 
+p34=p3+p4;
+p12=p1+p2
+*)
+
+Ilk = TRed[
+   3, {l, k}, {{k, 1}, {k - p12, 1}, {l, 1}, {l + p34, 1}, {l + p4, 
+     1}, {k - l, 1}, {k - p1, 1}}, {k, l}];
+
+(* 
+p3=-p1-p2-p4
+*)
+
+FIlk = Ilk /. {Pair[LorentzIndex[x_], Momentum["p34"]] :> 
+      FourVector["p3", x] + FourVector["p4", x], 
+     Pair[LorentzIndex[x_], Momentum["p12"]] :> 
+      FourVector["p1", x] + FourVector["p2", x]} // FullSimplify;
+
+FIlk1 = FIlk /. 
+   Pair[LorentzIndex[x_], Momentum["p3"]] :> -FourVector["p1", x] - 
+     FourVector["p2", x] - FourVector["p4", x];
+
+sIlk = FullSimplify[Expand[FIlk1]];
+
+(* g_munu coefficient *)
+
+Cgmunu = Coefficient[sIlk, MetricTensor["m1", "m2"]]
+
+A1 = FIREType[Cgmunu, 2, {0}, G] // ToExpression
+
+(* p2_mu p2_nu coefficient *)
+
+Cp2p2 = Coefficient[sIlk, 
+  Pair[LorentzIndex["m1"], Momentum["p2"]] Pair[LorentzIndex["m2"], 
+    Momentum["p2"]]]
+
+B1 = FIREType[Cp2p2, 2, {0}, G] // ToExpression
+
+
+
+
+Ik = TRed[3, {k}, {{k, 1}, {k - p12, 1}, {l + p34, 1}, {l + p4, 1}, {k - l, 
+    1}, {k - p1, 1}}, {k, l}]
+
+FIk = Ik /. {Pair[LorentzIndex[x_], Momentum["p34"]] :> 
+      FourVector["p3", x] + FourVector["p4", x], 
+     Pair[LorentzIndex[x_], Momentum["p12"]] :> 
+      FourVector["p1", x] + FourVector["p2", x]} // FullSimplify;
+
+FIk1 = FIk /. 
+   Pair[LorentzIndex[x_], Momentum["p3"]] :> -FourVector["p1", x] - 
+     FourVector["p2", x] - FourVector["p4", x];
+
+sIk = FullSimplify[Expand[FIk1]]
+
+Cp2k = Coefficient[sIk, Pair[LorentzIndex["m1"], Momentum["p2"]]] // Simplify
+
+A2 = FIREType[Cp2k, 2, {3}, G] // ToExpression
+
+
+
+
+Il = TRed[3, {l}, {{k - p12, 1}, {l, 1}, {l + p34, 1}, {l + p4, 1}, {k - l, 
+    1}, {k - p1, 1}}, {k, l}]
+
+FIl = Il /. {Pair[LorentzIndex[x_], Momentum["p34"]] :> 
+      FourVector["p3", x] + FourVector["p4", x], 
+     Pair[LorentzIndex[x_], Momentum["p12"]] :> 
+      FourVector["p1", x] + FourVector["p2", x]} // FullSimplify;
+
+FIl1 = FIl /. 
+   Pair[LorentzIndex[x_], Momentum["p3"]] :> -FourVector["p1", x] - 
+     FourVector["p2", x] - FourVector["p4", x];
+
+sIl = FullSimplify[Expand[FIl1]]
+
+Cp2l = Coefficient[sIl, Pair[LorentzIndex["m1"], Momentum["p2"]]] // Simplify
+
+A3 = FIREType[Cp2l, 2, {1}, G] // ToExpression
+
+Barnes lemmas
+
+D1[\[Lambda]1_, \[Lambda]2_, \[Lambda]3_, \[Lambda]4_] := 
+ Gamma[\[Lambda]1 + \[Lambda]3] Gamma[\[Lambda]1 + \[Lambda]4] \
+Gamma[\[Lambda]2 + \[Lambda]3] Gamma[\[Lambda]2 + \[Lambda]4]/
+   Gamma[\[Lambda]1 + \[Lambda]2 + \[Lambda]3 + \[Lambda]4]
+D1m[\[Lambda]1_, \[Lambda]2_, \[Lambda]3_, \[Lambda]4_] := (Gamma[\[Lambda]1 \
++ \[Lambda]3] Gamma[\[Lambda]2 + \[Lambda]3] Gamma[\[Lambda]1 + \[Lambda]4] \
+Gamma[\[Lambda]2 + \[Lambda]4] (PolyGamma[0, \[Lambda]1 + \[Lambda]3] + 
+      PolyGamma[0, \[Lambda]2 + \[Lambda]3] - 
+      PolyGamma[0, \[Lambda]1 + \[Lambda]2 + \[Lambda]3 + \[Lambda]4]))/
+  Gamma[\[Lambda]1 + \[Lambda]2 + \[Lambda]3 + \[Lambda]4]
+D1p[\[Lambda]1_, \[Lambda]2_, \[Lambda]3_, \[Lambda]4_] := (Gamma[\[Lambda]1 \
++ \[Lambda]3] Gamma[\[Lambda]2 + \[Lambda]3] Gamma[\[Lambda]1 + \[Lambda]4] \
+Gamma[\[Lambda]2 + \[Lambda]4] (PolyGamma[0, \[Lambda]1 + \[Lambda]3] + 
+      PolyGamma[0, \[Lambda]1 + \[Lambda]4] - 
+      PolyGamma[0, \[Lambda]1 + \[Lambda]2 + \[Lambda]3 + \[Lambda]4]))/
+  Gamma[\[Lambda]1 + \[Lambda]2 + \[Lambda]3 + \[Lambda]4]
+D2[\[Lambda]1_, \[Lambda]2_, \[Lambda]3_] := 
+ FullSimplify[
+  Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 + \[Lambda]3] (PolyGamma[\
+\[Lambda]1 - \[Lambda]2] - PolyGamma[\[Lambda]1 + \[Lambda]3])]
+D3[\[Lambda]1_, \[Lambda]2_, \[Lambda]3_] := 
+ FullSimplify[
+  Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 + \[Lambda]3] (PolyGamma[\
+\[Lambda]2 + \[Lambda]3] - PolyGamma[\[Lambda]1 + \[Lambda]3])]
+D4[\[Lambda]1_, \[Lambda]2_, \[Lambda]3_] := 
+ FullSimplify[
+  Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 + \[Lambda]3] (PolyGamma[\
+\[Lambda]1 - \[Lambda]2]^2 - 
+     PolyGamma[\[Lambda]1 - \[Lambda]2] PolyGamma[\[Lambda]1 + \[Lambda]3] + 
+     PolyGamma[1, \[Lambda]1 - \[Lambda]2] - 
+     PolyGamma[1, \[Lambda]1 + \[Lambda]3])]
+D5[\[Lambda]1_, \[Lambda]2_, \[Lambda]3_] := -1/
+   2 Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 + \[Lambda]3] \
+(PolyGamma[\[Lambda]1 - \[Lambda]2]^2 - 
+    PolyGamma[\[Lambda]1 + \[Lambda]3]^2 + 
+    2 PolyGamma[\[Lambda]1 - \[Lambda]2] (EulerGamma - 
+       PolyGamma[\[Lambda]2 + \[Lambda]3]) - 
+    2 PolyGamma[\[Lambda]1 + \[Lambda]3] (EulerGamma - 
+       PolyGamma[\[Lambda]2 + \[Lambda]3]) + 
+    PolyGamma[1, \[Lambda]1 - \[Lambda]2] + 
+    PolyGamma[1, \[Lambda]1 + \[Lambda]3])
+D6[\[Lambda]1_, \[Lambda]2_, \[Lambda]3_] := 
+ 1/2 Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 + \[Lambda]3] \
+(PolyGamma[\[Lambda]1 - \[Lambda]2]^2 + 
+    2 EulerGamma PolyGamma[\[Lambda]1 + \[Lambda]3] + 
+    PolyGamma[\[Lambda]1 + \[Lambda]3]^2 - 
+    2 PolyGamma[\[Lambda]1 - \[Lambda]2] (EulerGamma + 
+       PolyGamma[\[Lambda]1 + \[Lambda]3]) + 
+    PolyGamma[1, \[Lambda]1 - \[Lambda]2] - 
+    PolyGamma[1, \[Lambda]1 + \[Lambda]3])
+D7[\[Lambda]1_, \[Lambda]2_, \[Lambda]3_] := 
+ Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 + \[Lambda]3] (PolyGamma[\
+\[Lambda]1 - \[Lambda]2] PolyGamma[\[Lambda]2 + \[Lambda]3] - 
+    PolyGamma[\[Lambda]1 + \[Lambda]3] PolyGamma[\[Lambda]2 + \[Lambda]3] - 
+    PolyGamma[1, \[Lambda]1 + \[Lambda]3])
+D8[\[Lambda]1_, \[Lambda]2_, \[Lambda]3_] := 
+ FullSimplify[-Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 + \[Lambda]3] \
+(PolyGamma[\[Lambda]1 - \[Lambda]2] (PolyGamma[\[Lambda]1 + \[Lambda]3] - 
+        PolyGamma[\[Lambda]2 + \[Lambda]3]) + 
+     PolyGamma[1, \[Lambda]1 + \[Lambda]3])]
+D9[\[Lambda]1_, \[Lambda]2_, \[Lambda]3_] := 
+ FullSimplify[
+  1/2 Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 + \[Lambda]3] \
+((PolyGamma[\[Lambda]1 + \[Lambda]3] - 
+        PolyGamma[\[Lambda]2 + \[Lambda]3])^2 + 
+     2 EulerGamma (PolyGamma[\[Lambda]1 + \[Lambda]3] - 
+        PolyGamma[\[Lambda]2 + \[Lambda]3]) - 
+     PolyGamma[1, \[Lambda]1 + \[Lambda]3] + 
+     PolyGamma[1, \[Lambda]2 + \[Lambda]3])]
+D10[\[Lambda]1_, \[Lambda]2_, \[Lambda]3_] := 
+ FullSimplify[
+  1/2 Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 + \[Lambda]3] (2 \
+(PolyGamma[\[Lambda]1 - \[Lambda]2] - 
+        EulerGamma) (PolyGamma[\[Lambda]2 + \[Lambda]3] - 
+        PolyGamma[\[Lambda]1 + \[Lambda]3]) + 
+     PolyGamma[\[Lambda]1 + \[Lambda]3]^2 - 
+     PolyGamma[\[Lambda]2 + \[Lambda]3]^2 - 
+     PolyGamma[1, \[Lambda]1 + \[Lambda]3] - 
+     PolyGamma[1, \[Lambda]2 + \[Lambda]3])]
+D11[\[Lambda]1_, \[Lambda]2_, \[Lambda]3_] := 
+ FullSimplify[
+  Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 + \[Lambda]3] (PolyGamma[\
+\[Lambda]2 + \[Lambda]3]^2 - 
+     PolyGamma[\[Lambda]1 + \[Lambda]3] PolyGamma[\[Lambda]2 + \[Lambda]3] - 
+     PolyGamma[1, \[Lambda]1 + \[Lambda]3] + 
+     PolyGamma[1, \[Lambda]2 + \[Lambda]3])]
+D12[\[Lambda]1_, \[Lambda]2_, \[Lambda]3_] := 
+ FullSimplify[
+  Gamma[\[Lambda]1 - \[Lambda]2 - 
+     1] Gamma[\[Lambda]2 + \[Lambda]3] (1 - \[Lambda]1 + \[Lambda]2 + (\
+\[Lambda]1 + \[Lambda]3 - 1) (PolyGamma[\[Lambda]1 + \[Lambda]3 - 1] - 
+        PolyGamma[\[Lambda]2 + \[Lambda]3]))]
+D13[\[Lambda]1_, \[Lambda]2_] := (\[Lambda]1 + \[Lambda]2 - 
+    1) Gamma[\[Lambda]1 + \[Lambda]2] Gamma[-\[Lambda]1 - \[Lambda]2]
+D14[\[Lambda]1_, \[Lambda]2_] := 
+ Gamma[\[Lambda]1 + \[Lambda]2] Gamma[-\[Lambda]1 - \[Lambda]2] ((\[Lambda]1 \
++ \[Lambda]2) (PolyGamma[-\[Lambda]1 - \[Lambda]2] - 
+       PolyGamma[1 + \[Lambda]1 + \[Lambda]2]) - 1)
+D15[\[Lambda]1_, \[Lambda]2_] := 
+ Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 - \[Lambda]1] (2 EulerGamma +
+     PolyGamma[\[Lambda]1 - \[Lambda]2] + PolyGamma[\[Lambda]2 - \[Lambda]1])
+D19[\[Lambda]1_, \[Lambda]2_] := -1/
+   4 Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 - \[Lambda]1] (2 \
+EulerGamma^2 + \[Pi]^2 - 2 PolyGamma[\[Lambda]2 - \[Lambda]1]^2 - 
+    4 PolyGamma[
+      0, \[Lambda]2 - \[Lambda]1] (EulerGamma + 
+       PolyGamma[\[Lambda]1 - \[Lambda]2]) - 
+    2 PolyGamma[1, \[Lambda]2 - \[Lambda]1])
+D20[\[Lambda]1_, \[Lambda]2_] := 
+ FullSimplify[
+  2 Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 - \[Lambda]1] (EulerGamma \
++ PolyGamma[\[Lambda]1 - \[Lambda]2])]
+D21[\[Lambda]1_, \[Lambda]2_] := 
+ 2 Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 - \[Lambda]1] (EulerGamma +
+     PolyGamma[\[Lambda]2 - \[Lambda]1])
+D22[\[Lambda]1_, \[Lambda]2_] := -1/
+   4 Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 - \[Lambda]1] (2 \
+EulerGamma^2 + \[Pi]^2 + 4 EulerGamma PolyGamma[\[Lambda]2 - \[Lambda]1] + 
+    2 PolyGamma[\[Lambda]2 - \[Lambda]1]^2 + 
+    2 PolyGamma[1, \[Lambda]2 - \[Lambda]1] - 
+    8 PolyGamma[\[Lambda]1 - \[Lambda]2] (EulerGamma + 
+       PolyGamma[\[Lambda]2 - \[Lambda]1]))
+D23[\[Lambda]1_, \[Lambda]2_] := -1/
+   4 Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 - \[Lambda]1] (2 \
+EulerGamma^2 + \[Pi]^2 - 4 EulerGamma PolyGamma[\[Lambda]2 - \[Lambda]1] - 
+    6 PolyGamma[\[Lambda]2 - \[Lambda]1]^2 - 
+    6 PolyGamma[1, \[Lambda]2 - \[Lambda]1])
+D24[\[Lambda]1_, \[Lambda]2_] := -1/
+   4 Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 - \[Lambda]1] (2 \
+EulerGamma^2 + \[Pi]^2 + 4 EulerGamma PolyGamma[\[Lambda]2 - \[Lambda]1] + 
+    2 PolyGamma[\[Lambda]2 - \[Lambda]1]^2 - 
+    8 PolyGamma[\[Lambda]1 - \[Lambda]2] (EulerGamma + 
+       PolyGamma[\[Lambda]2 - \[Lambda]1]) + 
+    2 PolyGamma[1, \[Lambda]2 - \[Lambda]1])
+D25[\[Lambda]1_, \[Lambda]2_] := -1/
+   4 Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 - \[Lambda]1] (2 \
+EulerGamma^2 + \[Pi]^2 - 4 EulerGamma PolyGamma[\[Lambda]2 - \[Lambda]1] - 
+    6 PolyGamma[\[Lambda]2 - \[Lambda]1]^2 - 
+    6 PolyGamma[1, \[Lambda]2 - \[Lambda]1])
+D26[\[Lambda]1_, \[Lambda]2_] := 
+ FullSimplify[
+  Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 - \[Lambda]1] (2 EulerGamma \
++ PolyGamma[\[Lambda]1 - \[Lambda]2] + PolyGamma[\[Lambda]2 - \[Lambda]1])]
+D28[\[Lambda]1_, \[Lambda]2_] := 
+ FullSimplify[-1/
+    4 Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 - \[Lambda]1] (2 \
+(EulerGamma)^2 + \[Pi]^2 - 
+     4 (EulerGamma + 
+        PolyGamma[\[Lambda]1 - \[Lambda]2]) PolyGamma[\[Lambda]2 - \
+\[Lambda]1] - 2 PolyGamma[\[Lambda]2 - \[Lambda]1]^2 - 
+     2 PolyGamma[1, \[Lambda]2 - \[Lambda]1])]
+D29[\[Lambda]1_, \[Lambda]2_] := 
+ FullSimplify[-1/
+    4 Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 - \[Lambda]1] (2 \
+EulerGamma^2 + \[Pi]^2 - 4 PolyGamma[\[Lambda]1 - \[Lambda]2]^2 + 
+     4 EulerGamma PolyGamma[\[Lambda]2 - \[Lambda]1] + 
+     2 PolyGamma[\[Lambda]2 - \[Lambda]1]^2 - 
+     4 PolyGamma[\[Lambda]1 - \[Lambda]2] (2 EulerGamma + 
+        PolyGamma[\[Lambda]2 - \[Lambda]1]) - 
+     4 PolyGamma[1, \[Lambda]1 - \[Lambda]2] + 
+     2 PolyGamma[1, \[Lambda]2 - \[Lambda]1])]
+D31[\[Lambda]1_, \[Lambda]2_] := 
+ FullSimplify[-Gamma[\[Lambda]1 - \[Lambda]2] PolyGamma[
+    1, \[Lambda]1 - \[Lambda]2]]
+D52[\[Lambda]1_, \[Lambda]2_, \[Lambda]3_] := 
+ FullSimplify[
+  Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 + \[Lambda]3]/
+    Gamma[\[Lambda]1 + \[Lambda]3] (PolyGamma[1, \[Lambda]1 + \[Lambda]3] - 
+     PolyGamma[1, \[Lambda]2 + \[Lambda]3])]
+D57[\[Lambda]_] := 
+ 1/(6 \[Lambda]) Gamma[\[Lambda]] Gamma[-\[Lambda]] (12 (EulerGamma + 
+       PolyGamma[\[Lambda]]) + 2 \[Lambda] \[Pi]^2 + 
+    3 \[Lambda] ((PolyGamma[\[Lambda]] - PolyGamma[-\[Lambda]])^2 - 
+       PolyGamma[1, \[Lambda]] + PolyGamma[1, -\[Lambda]]))
+D59[\[Lambda]_] := 
+ 1/\[Lambda] Gamma[\[Lambda]] Gamma[-\[Lambda]] (2 (EulerGamma + 
+       PolyGamma[\[Lambda]]) - \[Lambda] (PolyGamma[1, \[Lambda]] - \[Pi]^2/6))
+BL1[\[Lambda]1_, \[Lambda]2_, \[Lambda]3_] := (Gamma[\[Lambda]1 - \[Lambda]2] \
+Gamma[-1 + \[Lambda]1 + \[Lambda]3] Gamma[\[Lambda]2 + \[Lambda]3] (6 \
+EulerGamma^2 + \[Pi]^2 - 
+       12 EulerGamma PolyGamma[0, \[Lambda]1 - \[Lambda]2] + 
+       12 EulerGamma PolyGamma[0, \[Lambda]2 + \[Lambda]3]) + 
+    Gamma[-1 + \[Lambda]1 - \[Lambda]2] (Gamma[-1 + \[Lambda]1 + \[Lambda]3] \
+Gamma[1 + \[Lambda]2 + \[Lambda]3] (12 - 12 EulerGamma + 
+          6 EulerGamma^2 + \[Pi]^2 - 
+          12 (-1 + EulerGamma) PolyGamma[0, -1 + \[Lambda]1 - \[Lambda]2] + 
+          12 (-1 + EulerGamma) PolyGamma[0, 1 + \[Lambda]2 + \[Lambda]3]) - 
+       Gamma[\[Lambda]1 + \[Lambda]3] Gamma[\[Lambda]2 + \[Lambda]3] (12 - 
+          12 EulerGamma + 6 EulerGamma^2 + \[Pi]^2 + 
+          12 (-1 + EulerGamma) PolyGamma[0, -1 + \[Lambda]1 + \[Lambda]3] + 
+          6 PolyGamma[0, -1 + \[Lambda]1 + \[Lambda]3]^2 - 
+          12 PolyGamma[
+            0, -1 + \[Lambda]1 - \[Lambda]2] (-1 + EulerGamma + 
+             PolyGamma[0, -1 + \[Lambda]1 + \[Lambda]3] - 
+             PolyGamma[0, \[Lambda]2 + \[Lambda]3]) - 
+          6 PolyGamma[0, \[Lambda]2 + \[Lambda]3]^2 - 
+          6 PolyGamma[1, -1 + \[Lambda]1 + \[Lambda]3] - 
+          6 PolyGamma[
+            1, \[Lambda]2 + \[Lambda]3])))/(12 Gamma[-1 + \[Lambda]1 + \
+\[Lambda]3])
+BL2[\[Lambda]1_, \[Lambda]2_] := 
+ 1/12 (Gamma[\[Lambda]1 - \[Lambda]2] Gamma[
+      1 - \[Lambda]1 + \[Lambda]2] (12 - 12 EulerGamma + 
+       6 EulerGamma^2 + \[Pi]^2 + 
+       12 (-1 + EulerGamma) PolyGamma[0, \[Lambda]1 - \[Lambda]2] - 
+       12 (-1 + EulerGamma) PolyGamma[0, 1 - \[Lambda]1 + \[Lambda]2]) - 
+    Gamma[-1 + \[Lambda]1 - \[Lambda]2] (12 Gamma[
+         1 - \[Lambda]1 + \[Lambda]2] (1 + 
+          PolyGamma[0, 1 - \[Lambda]1 + \[Lambda]2]) + 
+       Gamma[2 - \[Lambda]1 + \[Lambda]2] (-12 + 12 EulerGamma - 
+          6 EulerGamma^2 - \[Pi]^2 + 
+          6 PolyGamma[0, -1 + \[Lambda]1 - \[Lambda]2]^2 - 
+          12 PolyGamma[0, -1 + \[Lambda]1 - \[Lambda]2] PolyGamma[0, 
+            2 - \[Lambda]1 + \[Lambda]2] + 
+          6 PolyGamma[0, 2 - \[Lambda]1 + \[Lambda]2]^2 + 
+          6 PolyGamma[1, -1 + \[Lambda]1 - \[Lambda]2] + 
+          6 PolyGamma[1, 2 - \[Lambda]1 + \[Lambda]2])))
+D63[\[Lambda]1_, \[Lambda]2_] := 
+ 1/(\[Lambda]1^2 \[Lambda]2^2)
+   Gamma[\[Lambda]1 - \[Lambda]2] Gamma[\[Lambda]2 - \[Lambda]1] \
+(\[Lambda]1^2 - \[Lambda]1 \[Lambda]2 + \[Lambda]2^2 - \[Lambda]1 \[Lambda]2 \
+(\[Lambda]1 + \[Lambda]2) EulerGamma + \[Lambda]1 (\[Lambda]1 - \[Lambda]2) \
+\[Lambda]2 (PolyGamma[0, -\[Lambda]1] - 
+       PolyGamma[
+        0, -\[Lambda]2]) - \[Lambda]1 \[Lambda]2 (\[Lambda]2 PolyGamma[
+         0, \[Lambda]1 - \[Lambda]2] + \[Lambda]1 PolyGamma[
+         0, \[Lambda]2 - \[Lambda]1]))
+
+
+General two-loop planar double-box MB representation
+
+repr[a1_, a2_, a3_, a4_, a5_, a6_, a7_, a8_, d_] := 
+ 1/(Gamma[a2] Gamma[a4] Gamma[a5] Gamma[a6] Gamma[a7] Gamma[
+      4 - a4 - a5 - a6 - a7 - 2 \[Epsilon]4]) 1/(
+    Gamma[a1 + z3 + z4] Gamma[a3 + z2 + z4] Gamma[
+      4 - a1 - a2 - a3 - a8 - 2 \[Epsilon]4 + z1 - z4] Gamma[
+      a8 - z1 - z2 - z3 - z4]) y^
+    z1 Gamma[a2 + z1] Gamma[-z1] Gamma[z2 + z4] Gamma[z3 + z4] Gamma[
+     a1 + a2 + a3 + a8 - 2 + \[Epsilon]4 + z4] Gamma[a7 + z1 - z4] Gamma[
+     a8 - z2 - z3 - z4] Gamma[
+     a5 + z1 + z2 + z3 + z4] Gamma[-z1 - z2 - z3 - z4] Gamma[
+     a4 + a5 + a6 + a7 - 2 + \[Epsilon]4 + z1 - z4] Gamma[
+     2 - a1 - a2 - a8 - \[Epsilon]4 + z2] Gamma[
+     2 - a2 - a3 - a8 - \[Epsilon]4 + z3] Gamma[
+     2 - a5 - a6 - a7 - \[Epsilon]4 - z1 - z2] Gamma[
+     2 - a4 - a5 - a7 - \[Epsilon]4 - z1 - z3] /. \[Epsilon]4 -> (4 - d)/2 // 
+  Simplify
+
+Computation of A1 integral via MB
+
+<< MB.m
+
+MB 1.2
+
+by Michal Czakon
+
+improvements by Alexander Smirnov
+
+more info in hep-ph/0511200
+
+last modified 2 Jan 09
+
+MB = repr[1, 1, 1, 1, 1, 1, 2, 0, 5 - 2 ep] // Simplify
+
+(y^z1 Gamma[-z1] Gamma[1 + z1] Gamma[-(3/2) - ep - z1 - z2] Gamma[
+    1/2 - ep + z2] Gamma[-(3/2) - ep - z1 - z3] Gamma[1/2 - ep + z3] Gamma[
+    2 + z1 - z4] Gamma[5/2 + ep + z1 - z4] Gamma[-z2 - z3 - z4] Gamma[
+    1/2 + ep + z4] Gamma[z2 + z4] Gamma[z3 + z4] Gamma[
+    1 + z1 + z2 + z3 + z4])/(Gamma[-2 ep] Gamma[2 - 2 ep + z1 - z4] Gamma[
+    1 + z2 + z4] Gamma[1 + z3 + z4])
+
+rules = MBoptimizedRules[MB, ep -> 0, {}, {ep}]
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[-(1/2)-ep+z3+z4]
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[-(3/2)-ep-z1-z3]
+
+MBrules::norules: no rules could be found to regulate this integral
+
+{{ep -> -(9/16)}, {z1 -> -(7/8), z2 -> -(7/8), z3 -> -(1/8), z4 -> 15/16}}
+
+exp = MBexpand[MBcontinue[MB, ep -> 0, rules, Verbose -> False], 
+    1, {ep, 0, 0}] // MBapplyBarnes // MBmerge
+
+{MBint[-1/(
+    3 ep^2 y) \[Pi] (-6 + 6 ep (3 EulerGamma + PolyGamma[0, 1/2]) - 
+       6 ep Log[y] (-1 + 
+          ep (2 EulerGamma + PolyGamma[0, 1/2] - PolyGamma[0, 3/2])) + 
+       ep^2 (12 + 8 \[Pi]^2 - 9 PolyGamma[0, 1/2]^2 - 
+          6 PolyGamma[0, 1/2] PolyGamma[0, 3/2] + 
+          3 PolyGamma[0, 3/2]^2)), {{ep -> 0}, {}}], 
+ MBint[-1/y Gamma[-(1/2) - z2] Gamma[-z2] Gamma[1/2 + z2] Gamma[
+      1 + z2] (PolyGamma[0, -(1/2) - z2] + PolyGamma[0, 1/2 + z2] - 
+       2 PolyGamma[0, 1 + z2] + 2 PolyGamma[0, 3/2 + z2]), {{ep -> 
+     0}, {z2 -> -(7/8)}}], 
+ MBint[-1/y Gamma[-(1/2) - z3] Gamma[-z3] Gamma[1/2 + z3] Gamma[
+      1 + z3] (PolyGamma[0, -(1/2) - z3] + PolyGamma[0, 1/2 + z3] - 
+       2 PolyGamma[0, 1 + z3] + 2 PolyGamma[0, 3/2 + z3]), {{ep -> 
+     0}, {z3 -> -(1/8)}}], 
+ MBint[-((Gamma[1 - z4] Gamma[
+     3/2 - z4] Gamma[-1 + z4] Gamma[-(1/2) + z4]^2 (2 PolyGamma[0, 1 - z4] + 
+      PolyGamma[0, 3/2 - z4] + PolyGamma[0, 1/2 + z4]))/(
+   2 y Gamma[1/2 + z4])), {{ep -> 0}, {z4 -> 15/16}}]}
+
+We split the result in four parts. The first part is a pure number. The others contain some MB integrals that can be solved with Barnes lemma.
+
+SECOND PIECE
+
+start1 = exp[[2]] /. 
+  PolyGamma[0, -(1/2) - z2] + PolyGamma[0, 1/2 + z2] - 
+    2 PolyGamma[0, 1 + z2] + 2 PolyGamma[0, 3/2 + z2] -> 
+   4/(1 + 2 z2) + PolyGamma[0, -(1/2) - z2] + 3 PolyGamma[0, 1/2 + z2] - 
+    2 PolyGamma[0, 1 + z2]
+
+MBint[-((Gamma[-(1/2) - z2] Gamma[-z2] Gamma[1/2 + z2] Gamma[
+    1 + z2] (4/(1 + 2 z2) + PolyGamma[0, -(1/2) - z2] + 
+     3 PolyGamma[0, 1/2 + z2] - 2 PolyGamma[0, 1 + z2]))/
+  y), {{ep -> 0}, {z2 -> -(7/8)}}]
+
+PolyGamma[0, -(1/2) - z2] + PolyGamma[0, 1/2 + z2] - 2 PolyGamma[0, 1 + z2] + 
+   2 PolyGamma[0, 3/2 + z2] // FullSimplify // FunctionExpand
+
+4/(1 + 2 z2) + PolyGamma[0, -(1/2) - z2] + 3 PolyGamma[0, 1/2 + z2] - 
+ 2 PolyGamma[0, 1 + z2]
+
+numres1 = MBintegrate[{start1}, {y -> 0.32}, Verbose -> False]
+
+{65.03380215129550, 0}
+
+res1 = Expand[
+     start1[[1]]] /. {Gamma[-(1/2) - z2] Gamma[-z2] Gamma[1/2 + z2] Gamma[
+        1 + z2] PolyGamma[0, -(1/2) - z2] -> D6[1, 1/2, 0], 
+     Gamma[-(1/2) - z2] Gamma[-z2] Gamma[1/2 + z2] Gamma[1 + z2] PolyGamma[0, 
+        1/2 + z2] -> D5[1, 1/2, 0], 
+     Gamma[-(1/2) - z2] Gamma[-z2] Gamma[1/2 + z2] Gamma[1 + z2] PolyGamma[0, 
+        1 + z2] -> 
+      D4[1, 1/2, 0], -((
+       4 Gamma[-(1/2) - z2] Gamma[-z2] Gamma[1/2 + z2] Gamma[1 + z2])/(
+       y (1 + 2 z2))) -> -(1/
+        y) (Limit[D63[\[Delta], 1/2], \[Delta] -> 0] + 2 D15[1/2, 0])} // 
+   FunctionExpand // FullSimplify
+% /. y -> 0.32
+
+(5 \[Pi]^3 - 12 EulerGamma \[Pi] Log[4])/(6 y)
+
+65.0338
+
+THIRD PART
+
+numres2 = MBintegrate[{exp[[3]]}, {y -> 0.32}, Verbose -> False]
+
+{0.4373924002124185, 0}
+
+exp[[3]]
+
+MBint[-1/y Gamma[-(1/2) - z3] Gamma[-z3] Gamma[1/2 + z3] Gamma[
+     1 + z3] (PolyGamma[0, -(1/2) - z3] + PolyGamma[0, 1/2 + z3] - 
+      2 PolyGamma[0, 1 + z3] + 2 PolyGamma[0, 3/2 + z3]), {{ep -> 
+    0}, {z3 -> -(1/8)}}]
+
+res2 = res1 + Residue[exp[[3, 1]], {z3, -1/2}] // FullSimplify
+% /. y -> 0.32
+
+(\[Pi]^3 - 12 EulerGamma \[Pi] Log[4])/(6 y)
+
+0.437392
+
+FOURTH PART
+
+start3 = exp[[4]]
+
+MBint[-((Gamma[1 - z4] Gamma[
+    3/2 - z4] Gamma[-1 + z4] Gamma[-(1/2) + z4]^2 (2 PolyGamma[0, 1 - z4] + 
+     PolyGamma[0, 3/2 - z4] + PolyGamma[0, 1/2 + z4]))/(
+  2 y Gamma[1/2 + z4])), {{ep -> 0}, {z4 -> 15/16}}]
+
+MBintegrate[{start3}, {y -> 0.32}]
+
+Shifting contours...
+
+Performing 1 lower-dimensional integrations with NIntegrate...1
+
+Higher-dimensional integrals
+
+{-218.5058769526171, 0}
+
+-((Gamma[1 - z4] Gamma[
+     3/2 - z4] Gamma[-1 + z4] Gamma[-(1/2) + z4]^2 (2 PolyGamma[0, 1 - z4] + 
+      PolyGamma[0, 3/2 - z4] + PolyGamma[0, 1/2 + z4]))/(
+   2 y Gamma[1/2 + z4])) - (1/(2 y)
+     Gamma[1 - z4] Gamma[
+     1/2 - z4] Gamma[-1 + z4] Gamma[-(1/2) + z4] (2 PolyGamma[0, 1 - z4] + 
+      PolyGamma[0, 1/2 - z4] + PolyGamma[0, -(1/2) + z4])) // FullSimplify
+
+0
+
+start3mod = (
+  Gamma[1 - z4] Gamma[
+    1/2 - z4] Gamma[-1 + z4] Gamma[-(1/2) + z4] (2 PolyGamma[0, 1 - z4] + 
+     PolyGamma[0, 1/2 - z4] + PolyGamma[0, -(1/2) + z4]))/(2 y) // Expand
+
+(Gamma[1/2 - z4] Gamma[1 - z4] Gamma[-1 + z4] Gamma[-(1/2) + z4] PolyGamma[0, 
+   1/2 - z4])/(2 y) + (
+ Gamma[1/2 - z4] Gamma[1 - z4] Gamma[-1 + z4] Gamma[-(1/2) + z4] PolyGamma[0, 
+   1 - z4])/y + (
+ Gamma[1/2 - z4] Gamma[1 - z4] Gamma[-1 + z4] Gamma[-(1/2) + z4] PolyGamma[
+   0, -(1/2) + z4])/(2 y)
+
+res3 = start3mod /. {(
+     Gamma[1/2 - z4] Gamma[
+       1 - z4] Gamma[-1 + z4] Gamma[-(1/2) + z4] PolyGamma[0, 1/2 - z4])/(
+     2 y) -> 1/(2 y) D24[-1, -1/2], (
+     Gamma[1/2 - z4] Gamma[
+       1 - z4] Gamma[-1 + z4] Gamma[-(1/2) + z4] PolyGamma[0, 1 - z4])/y -> 
+     1/y D25[-1, -1/2], (
+     Gamma[1/2 - z4] Gamma[
+       1 - z4] Gamma[-1 + z4] Gamma[-(1/2) + z4] PolyGamma[0, -(1/2) + z4])/(
+     2 y) -> 1/(2 y) D23[-1, -1/2]} // FullSimplify
+% /. y -> 0.32
+
+-((\[Pi] (\[Pi]^2 + 8 Log[2] (-1 + 2 EulerGamma + Log[8])))/y)
+
+-218.506
+
+ALL TOGETHER
+
+Series[E^(2 ep EulerGamma) (exp[[1, 1]] + res1 + res2 + res3), {ep, 0, 0}] // 
+   FullSimplify // PowerExpand // ExpandAll
+
+SeriesData[MB`ep, 0, {
+ 2 (Pi/y), ((4 Pi)/y) Log[2] - ((2 Pi)/y) Log[
+   y], (-8) (Pi/y) + Rational[-8, 3] (Pi^3/y) + ((8 Pi)/y) Log[2] - ((8 Pi)/y)
+    Log[2]^2 - ((4 Pi)/y) Log[y]}, -2, 1, 1]
+
+a1 = -((E^(-2 \[Epsilon] EulerGamma) 2^(2 \[Epsilon]))/(
+   s^(2 + \[Epsilon]) t^(1 + \[Epsilon]))) ((2 \[Pi])/
+    ep^2 + (-8 \[Pi] - (8 \[Pi]^3)/3 + 8 \[Pi] Log[2] - 12 \[Pi] Log[2]^2 - 
+      4 \[Pi] Log[y] + 4 \[Pi] Log[2] Log[y] - \[Pi] Log[y]^2))
+
+-2^(2 \[Epsilon]) E^(-2 EulerGamma \[Epsilon]) s^(-2 - \[Epsilon]) t^(-1 - \
+\[Epsilon]) (-8 \[Pi] + (2 \[Pi])/ep^2 - (8 \[Pi]^3)/3 + 8 \[Pi] Log[2] - 
+   12 \[Pi] Log[2]^2 - 4 \[Pi] Log[y] + 
+   4 \[Pi] Log[2] Log[y] - \[Pi] Log[y]^2)
+
+MBintegrate[{exp}, {y -> 0.32}, Verbose -> False]
+
+{-319.642 + 19.635/ep^2 + 26.9254/ep, 0}
+
+exp[[1, 1]] + res1 + res2 + res3 /. {y -> 0.32} // N // FullSimplify
+
+-319.642 + (19.635 + 26.9254 ep)/ep^2
+
+Decomposition with FIRE of Subscript[A, 2],Subscript[A, 3],Subscript[A, 4],Subscript[B, 1]
+
+Quit
+
+SetDirectory[NotebookDirectory[]];
+
+Get["FIRE_4.0.0.m"];
+
+General::compat: Combinatorica Graph and Permutations functionality has been superseded by preloaded functionality. The package now being loaded may conflict with this. Please see the Compatibility Guide for details.
+
+SetDelayed::write: Tag Element in a_List\[Element]{index___} is Protected. >>
+
+FIRE, version 4.0.0
+
+UsingIBP: True
+
+DatabaseUsage: 0
+
+UsingFermat: False
+
+LeeIdeas: True
+
+Internal = {k, l};
+External = {p1, p2, p3};
+Propagators = {(k + p1)^2, (k - p2)^2, (l + p1)^2, (l - p2)^2, (l + p1 + 
+     p3)^2, (l - k)^2, k^2, l^2, (k + p3 + p1)^2};
+PrepareIBP[];
+reps = {p1^2 -> 0, p2^2 -> 0, p3^2 -> 0, p1 p2 -> s/2, p2 p3 -> (-s - t)/2, 
+   p1 p3 -> t/2};
+startinglist = {IBP[k, k], IBP[k, k - l], IBP[k, k + p1], IBP[k, k - p2], 
+    IBP[k, k + p1 + p3], IBP[l, l], IBP[l, l - k], IBP[l, l + p1], 
+    IBP[l, l - p2], IBP[l, l + p1 + p3]}(*{IBP[k,k],IBP[k,l],IBP[k,p1],IBP[k,
+   p2],IBP[k,p3],IBP[l,l],IBP[l,k],IBP[l,p1],IBP[l,p2],IBP[l,p3]}*)/. reps;
+SYMMETRIES = {{2, 1, 4, 3, 5, 6, 7, 8, 9}, {3, 4, 1, 2, 7, 6, 5, 9, 8}, {4, 3,
+     2, 1, 7, 6, 5, 9, 8}};
+RESTRICTIONS = {{-1, -1, 0, 0, 0, 0, -1, 0, 0}, {-1, 0, -1, 0, 0, 0, -1, 0, 
+    0}, {0, -1, 0, -1, 0, 0, -1, 0, 0}, {-1, 0, 0, 0, 0, -1, 0, 0, 0}, {0, -1,
+     0, 0, 0, -1, 0, 0, 0}, {0, 0, -1, 0, 0, -1, 0, 0, 0}, {0, 0, 0, -1, 
+    0, -1, 0, 0, 0}, {0, 0, -1, -1, -1, 0, 0, 0, 0}, {-1, 0, -1, 0, -1, 0, 0, 
+    0, 0}, {0, -1, 0, -1, -1, 0, 0, 0, 0}};
+Prepare[];
+
+Prepared
+
+Dimension set to 9
+
+Info[{0, 0, 0, 0, 0, 0, 0, -1, -1}]
+
+Sectors in the area :128
+
+Non-trivial sectors in the area :43
+
+Non-trivial sectors up to a symmetry in the area :18
+
+Bases built in 0 sectors
+
+Nothing in 18 sectors
+
+BuildAll[{0, 0, 0, 0, 0, 0, 0, -1, -1}, Verbose -> False];
+
+Info[{0, 0, 0, 0, 0, 0, 0, -1, -1}, True]
+
+Sectors in the area :128
+
+Non-trivial sectors in the area :43
+
+Non-trivial sectors up to a symmetry in the area :18
+
+Bases built in 0 sectors
+
+Nothing in 18 sectors
+
+{{1,1,1,1,1,1,1,-1,-1}}
+
+1 additional minus
+
+{{1,1,1,1,1,-1,1,-1,-1}}
+
+{{1,1,1,1,-1,1,1,-1,-1},{1,1,1,1,1,1,-1,-1,-1}}
+
+{{-1,1,1,1,1,1,1,-1,-1},{1,-1,1,1,1,1,1,-1,-1},{1,1,-1,1,1,1,1,-1,-1},{1,1,1,-1,1,1,1,-1,-1}}
+
+2 additional minuses
+
+{{1,1,1,1,-1,1,-1,-1,-1}}
+
+{{-1,-1,1,1,1,1,1,-1,-1},{1,1,-1,-1,1,1,1,-1,-1}}
+
+{{-1,1,-1,1,1,1,1,-1,-1},{1,-1,1,-1,1,1,1,-1,-1}}
+
+{{-1,1,1,-1,1,1,1,-1,-1},{1,-1,-1,1,1,1,1,-1,-1}}
+
+{{1,1,1,1,-1,-1,1,-1,-1},{1,1,1,1,1,-1,-1,-1,-1}}
+
+{{-1,1,1,1,-1,1,1,-1,-1},{1,-1,1,1,-1,1,1,-1,-1},{1,1,-1,1,1,1,-1,-1,-1},{1,1,1,-1,1,1,-1,-1,-1}}
+
+{{-1,1,1,1,1,1,-1,-1,-1},{1,-1,1,1,1,1,-1,-1,-1},{1,1,-1,1,-1,1,1,-1,-1},{1,1,1,-1,-1,1,1,-1,-1}}
+
+3 additional minuses
+
+{{1,1,1,1,-1,-1,-1,-1,-1}}
+
+{{-1,-1,1,1,-1,1,1,-1,-1},{1,1,-1,-1,1,1,-1,-1,-1}}
+
+{{-1,-1,-1,1,1,1,1,-1,-1},{-1,-1,1,-1,1,1,1,-1,-1},{-1,1,-1,-1,1,1,1,-1,-1},{1,-1,-1,-1,1,1,1,-1,-1}}
+
+{{-1,1,1,-1,-1,1,1,-1,-1},{-1,1,1,-1,1,1,-1,-1,-1},{1,-1,-1,1,-1,1,1,-1,-1},{1,-1,-1,1,1,1,-1,-1,-1}}
+
+{{-1,1,1,1,-1,1,-1,-1,-1},{1,-1,1,1,-1,1,-1,-1,-1},{1,1,-1,1,-1,1,-1,-1,-1},{1,1,1,-1,-1,1,-1,-1,-1}}
+
+4 additional minuses
+
+{{-1,-1,-1,-1,1,1,1,-1,-1}}
+
+{{-1,1,1,-1,-1,1,-1,-1,-1},{1,-1,-1,1,-1,1,-1,-1,-1}}
+
+Burn[]
+
+True
+
+(*A1=-((G[{1,1,1,1,1,2,1,0,0}])/2)/.G->F*)
+
+
+(*B1=2 G[{1,1,1,3,1,2,2,0,0}]+4 \
+G[{1,1,1,3,1,3,1,0,0}]+G[{1,2,1,2,1,2,2,0,0}]+4 \
+G[{1,2,1,2,1,3,1,0,0}]+G[{1,2,1,2,2,1,2,0,0}]+G[{1,2,1,2,2,2,1,0,0}]+2 \
+G[{1,2,1,3,1,1,2,0,0}]+4 \
+G[{1,2,1,3,1,2,1,0,0}]+G[{1,2,2,2,1,1,2,0,0}]+G[{1,2,2,2,1,2,1,0,0}]+4 \
+G[{1,3,1,1,1,3,1,0,0}]+2 G[{1,3,1,1,2,2,1,0,0}]+4 G[{1,3,1,2,1,2,1,0,0}]+2 \
+G[{1,3,1,2,2,1,1,0,0}]+4 G[{1,3,1,3,1,1,1,0,0}]+2 G[{1,3,2,1,1,2,1,0,0}]+2 \
+G[{1,3,2,2,1,1,1,0,0}]+2 \
+G[{2,1,1,3,1,2,1,0,0}]+G[{2,2,1,2,1,2,1,0,0}]+G[{2,2,1,2,2,1,1,0,0}]+2 \
+G[{2,2,1,3,1,1,1,0,0}]+G[{2,2,2,2,1,1,1,0,0}]/.G->F;
+A2=G[{1,1,0,2,1,2,1,0,0}]+G[{1,2,0,1,1,2,1,0,0}]+G[{1,2,0,1,2,1,1,0,0}]+G[{1,\
+2,0,2,1,1,1,0,0}]/.G->F;
+A3=G[{0,1,1,2,1,1,2,0,0}]+G[{0,1,1,2,1,2,1,0,0}]+G[{0,2,1,1,1,2,1,0,0}]+G[{0,\
+2,1,2,1,1,1,0,0}]/.G->F;
+A4=F[{0,1,0,1,1,1,1,0,0}];*)
+
+
+decB1 = Normal[
+  Series[(Collect[
+      B1 // Expand, {G[{0, 1, 1, 0, 0, 1, 0, 0, 0}], 
+       G[{0, 1, 1, 0, 1, 1, 1, 0, 0}], G[{1, 1, 1, 1, 1, 1, 1, -1, 0}], 
+       G[{1, 1, 1, 1, 1, 1, 1, 0, 0}], G[{0, 0, 0, 0, 1, 1, 1, 0, 0}], 
+       G[{1, 1, 0, 0, 1, 1, 0, 0, 0}], G[{1, 1, 1, 1, 0, 0, 0, 0, 0}], 
+       G[{1, 1, 0, 0, 1, 1, 1, 0, 0}]}]) /. 
+    d -> 7 - 2 \[Epsilon], {\[Epsilon], 0, 2}]]
+decA2 = Normal[
+  Series[(Collect[
+      A2 // Expand // FullSimplify, {G[{0, 1, 1, 0, 0, 1, 0, 0, 0}], 
+       G[{0, 1, 1, 0, 1, 1, 1, 0, 0}], G[{1, 1, 1, 1, 1, 1, 1, -1, 0}], 
+       G[{1, 1, 1, 1, 1, 1, 1, 0, 0}], G[{0, 0, 0, 0, 1, 1, 1, 0, 0}], 
+       G[{1, 1, 0, 0, 1, 1, 0, 0, 0}], G[{1, 1, 1, 1, 0, 0, 0, 0, 0}], 
+       G[{1, 1, 0, 0, 1, 1, 1, 0, 0}]}]) /. 
+    d -> 5 - 2 \[Epsilon], {\[Epsilon], 0, 2}]]
+decA3 = Normal[
+  Series[(Collect[
+      A3 // Expand // FullSimplify, {G[{0, 1, 1, 0, 0, 1, 0, 0, 0}], 
+       G[{0, 1, 1, 0, 1, 1, 1, 0, 0}], G[{1, 1, 1, 1, 1, 1, 1, -1, 0}], 
+       G[{1, 1, 1, 1, 1, 1, 1, 0, 0}], G[{0, 0, 0, 0, 1, 1, 1, 0, 0}], 
+       G[{1, 1, 0, 0, 1, 1, 0, 0, 0}], G[{1, 1, 1, 1, 0, 0, 0, 0, 0}], 
+       G[{1, 1, 0, 0, 1, 1, 1, 0, 0}]}]) /. 
+    d -> 5 - 2 \[Epsilon], {\[Epsilon], 0, 2}]]
+decA4 = Normal[
+  Series[(Collect[
+      A4 // Expand // FullSimplify, {G[{0, 1, 1, 0, 0, 1, 0, 0, 0}], 
+       G[{0, 1, 1, 0, 1, 1, 1, 0, 0}], G[{1, 1, 1, 1, 1, 1, 1, -1, 0}], 
+       G[{1, 1, 1, 1, 1, 1, 1, 0, 0}], G[{0, 0, 0, 0, 1, 1, 1, 0, 0}], 
+       G[{1, 1, 0, 0, 1, 1, 0, 0, 0}], G[{1, 1, 1, 1, 0, 0, 0, 0, 0}], 
+       G[{1, 1, 0, 0, 1, 1, 1, 0, 0}]}]) /. 
+    d -> 3 - 2 \[Epsilon], {\[Epsilon], 0, 2}]]
+
+(240240 G[{0, 0, 0, 0, 1, 1, 1, 0, 0}])/(s^3 t^5) + (
+ 240240 G[{0, 1, 1, 0, 0, 1, 0, 0, 0}])/(s^7 t) + (
+ 3465 G[{1, 1, 0, 0, 1, 1, 0, 0, 0}])/(
+ s^6 t) + \[Epsilon] (-((
+     8 (30030 s^4 + 167091 s^3 t + 180180 s^2 t^2 + 90090 s t^3 + 
+        20020 t^4) G[{0, 0, 0, 0, 1, 1, 1, 0, 0}])/(s^6 t^6)) - (
+    8 (20020 s^3 + 90090 s^2 t + 180180 s t^2 + 287211 t^3) G[{0, 1, 1, 0, 0, 
+       1, 0, 0, 0}])/(s^7 t^4) + (
+    7560 (s^4 + 4 s^3 t + 6 s^2 t^2 + 4 s t^3 + t^4) G[{0, 1, 1, 0, 1, 1, 1, 
+       0, 0}])/(s^6 t^4) - (
+    3 (24640 s^3 - 18480 s^2 t + 9240 s t^2 + 7167 t^3) G[{1, 1, 0, 0, 1, 1, 
+       0, 0, 0}])/(2 s^6 t^4) - (20160 G[{1, 1, 0, 0, 1, 1, 1, 0, 0}])/(
+    s^2 t^4)) + \[Epsilon]^2 ((
+    8 (711483 s^4 - 1240142 s^3 t + 1421768 s^2 t^2 - 112081 s t^3 - 
+       214366 t^4) G[{0, 0, 0, 0, 1, 1, 1, 0, 0}])/(3 s^6 t^6) + (
+    8 (314162 s^3 + 1161191 s^2 t + 1666298 s t^2 - 1446974 t^3) G[{0, 1, 1, 
+       0, 0, 1, 0, 0, 0}])/(
+    3 s^7 t^4) + (23256/s^6 - 43272/(s^2 t^4) - 145080/(s^3 t^3) - 143136/(
+       s^4 t^2) - 18072/(s^5 t)) G[{0, 1, 1, 0, 1, 1, 1, 0, 
+       0}] + ((200912 s^3 - 389252 s^2 t + 72922 s t^2 - 81759 t^3) G[{1, 1, 
+       0, 0, 1, 1, 0, 0, 0}])/(s^6 t^4) + (
+    96 (1167 s^2 - 1408 s t - 736 t^2) G[{1, 1, 0, 0, 1, 1, 1, 0, 0}])/(
+    s^4 t^4) - (512 (25 s + 14 t) G[{1, 1, 1, 1, 0, 0, 0, 0, 0}])/(
+    s^6 t^2) - (144 (5 s - 2 t) G[{1, 1, 1, 1, 1, 1, 1, -1, 0}])/(
+    s^4 t^2) + (64/s^4 - 840/(s^2 t^2) + 240/(s^3 t)) G[{1, 1, 1, 1, 1, 1, 1, 
+       0, 0}])
+
+(210 G[{0, 0, 0, 0, 1, 1, 1, 0, 0}])/(s^2 t^3) + (
+ 210 G[{0, 1, 1, 0, 0, 1, 0, 0, 0}])/(s^4 t) - (
+ 15 G[{1, 1, 0, 0, 1, 1, 0, 0, 0}])/(
+ s^3 t) + \[Epsilon] (-((
+     6 (70 s^2 + 247 s t + 70 t^2) G[{0, 0, 0, 0, 1, 1, 1, 0, 0}])/(
+     s^3 t^4)) - (6 (70 s + 247 t) G[{0, 1, 1, 0, 0, 1, 0, 0, 0}])/(
+    s^4 t^2) + (6 (s + t)^2 G[{0, 1, 1, 0, 1, 1, 1, 0, 0}])/(s^3 t^2) - (
+    3 (20 s - 31 t) G[{1, 1, 0, 0, 1, 1, 0, 0, 0}])/(s^3 t^2) - (
+    24 G[{1, 1, 0, 0, 1, 1, 1, 0, 0}])/(s t^2)) + \[Epsilon]^2 ((
+    12 (247 s^2 - 222 s t + 107 t^2) G[{0, 0, 0, 0, 1, 1, 1, 0, 0}])/(
+    s^3 t^4) + (12 (107 s - 222 t) G[{0, 1, 1, 0, 0, 1, 0, 0, 0}])/(
+    s^4 t^2) - (36 (s + t)^2 G[{0, 1, 1, 0, 1, 1, 1, 0, 0}])/(s^3 t^2) + (
+    42 (6 s + 5 t) G[{1, 1, 0, 0, 1, 1, 0, 0, 0}])/(s^3 t^2) + (
+    120 G[{1, 1, 0, 0, 1, 1, 1, 0, 0}])/(s t^2))
+
+(210 G[{0, 0, 0, 0, 1, 1, 1, 0, 0}])/(s^2 t^3) + (
+ 210 G[{0, 1, 1, 0, 0, 1, 0, 0, 0}])/(s^4 t) - (
+ 15 G[{1, 1, 0, 0, 1, 1, 0, 0, 0}])/(
+ s^3 t) + \[Epsilon] (-((
+     6 (70 s^2 + 247 s t + 70 t^2) G[{0, 0, 0, 0, 1, 1, 1, 0, 0}])/(
+     s^3 t^4)) - (6 (70 s + 247 t) G[{0, 1, 1, 0, 0, 1, 0, 0, 0}])/(
+    s^4 t^2) + (6 (s + t)^2 G[{0, 1, 1, 0, 1, 1, 1, 0, 0}])/(s^3 t^2) - (
+    3 (20 s - 31 t) G[{1, 1, 0, 0, 1, 1, 0, 0, 0}])/(s^3 t^2) - (
+    24 G[{1, 1, 0, 0, 1, 1, 1, 0, 0}])/(s t^2)) + \[Epsilon]^2 ((
+    12 (247 s^2 - 222 s t + 107 t^2) G[{0, 0, 0, 0, 1, 1, 1, 0, 0}])/(
+    s^3 t^4) + (12 (107 s - 222 t) G[{0, 1, 1, 0, 0, 1, 0, 0, 0}])/(
+    s^4 t^2) - (36 (s + t)^2 G[{0, 1, 1, 0, 1, 1, 1, 0, 0}])/(s^3 t^2) + (
+    42 (6 s + 5 t) G[{1, 1, 0, 0, 1, 1, 0, 0, 0}])/(s^3 t^2) + (
+    120 G[{1, 1, 0, 0, 1, 1, 1, 0, 0}])/(s t^2))
+
+-((2 \[Epsilon] G[{0, 0, 0, 0, 1, 1, 1, 0, 0}])/t^2) + (
+ 12 \[Epsilon]^2 G[{0, 0, 0, 0, 1, 1, 1, 0, 0}])/t^2
+
+The notation for master integrals is borrowed from arXiv:1311.6464
+
+intrep5 = {G[{0, 1, 1, 0, 0, 1, 0, 0, 0}] -> SUNSET[s, 5], 
+   G[{0, 0, 0, 0, 1, 1, 1, 0, 0}] -> SUNSET[t, 5], 
+   G[{1, 1, 0, 0, 1, 1, 0, 0, 0}] -> TRI[s, 5], 
+   G[{1, 1, 1, 1, 0, 0, 0, 0, 0}] -> GLASS[s, 5], 
+   G[{1, 1, 1, 1, 1, 1, 1, -1, 0}] -> DBN[s, t, 5], 
+   G[{1, 1, 1, 1, 1, 1, 1, 0, 0}] -> DOUBLEBOX[s, t, 5], 
+   G[{1, 1, 0, 0, 1, 1, 1, 0, 0}] -> CUP[s, t, 5], 
+   G[{0, 1, 1, 0, 1, 1, 1, 0, 0}] -> DIAG[s, t, 5], \[Mu]2 -> 1};
+intrep7 = {G[{0, 1, 1, 0, 0, 1, 0, 0, 0}] -> SUNSET[s, 7], 
+   G[{0, 0, 0, 0, 1, 1, 1, 0, 0}] -> SUNSET[t, 7], 
+   G[{1, 1, 0, 0, 1, 1, 0, 0, 0}] -> TRI[s, 7], 
+   G[{1, 1, 1, 1, 0, 0, 0, 0, 0}] -> GLASS[s, 7], 
+   G[{1, 1, 1, 1, 1, 1, 1, -1, 0}] -> DBN[s, t, 7], 
+   G[{1, 1, 1, 1, 1, 1, 1, 0, 0}] -> DOUBLEBOX[s, t, 7], 
+   G[{1, 1, 0, 0, 1, 1, 1, 0, 0}] -> CUP[s, t, 7], 
+   G[{0, 1, 1, 0, 1, 1, 1, 0, 0}] -> DIAG[s, t, 7], \[Mu]2 -> 1};
+intrep3 = {G[{0, 1, 1, 0, 0, 1, 0, 0, 0}] -> SUNSET[s, 3], 
+   G[{0, 0, 0, 0, 1, 1, 1, 0, 0}] -> SUNSET[t, 3], 
+   G[{1, 1, 0, 0, 1, 1, 0, 0, 0}] -> TRI[s, 3], 
+   G[{1, 1, 1, 1, 0, 0, 0, 0, 0}] -> GLASS[s, 3], 
+   G[{1, 1, 1, 1, 1, 1, 1, -1, 0}] -> DBN[s, t, 3], 
+   G[{1, 1, 1, 1, 1, 1, 1, 0, 0}] -> DOUBLEBOX[s, t, 3], 
+   G[{1, 1, 0, 0, 1, 1, 1, 0, 0}] -> CUP[s, t, 3], 
+   G[{0, 1, 1, 0, 1, 1, 1, 0, 0}] -> DIAG[s, t, 3], \[Mu]2 -> 1};
+
+
+
+decA2 /. intrep5
+decA3 /. intrep5
+
+(210 SUNSET[s, 5])/(s^4 t) + (210 SUNSET[t, 5])/(s^2 t^3) - (15 TRI[s, 5])/(
+ s^3 t) + \[Epsilon] (-((24 CUP[s, t, 5])/(s t^2)) + (
+    6 (s + t)^2 DIAG[s, t, 5])/(s^3 t^2) - (6 (70 s + 247 t) SUNSET[s, 5])/(
+    s^4 t^2) - (6 (70 s^2 + 247 s t + 70 t^2) SUNSET[t, 5])/(s^3 t^4) - (
+    3 (20 s - 31 t) TRI[s, 5])/(s^3 t^2)) + \[Epsilon]^2 ((120 CUP[s, t, 5])/(
+    s t^2) - (36 (s + t)^2 DIAG[s, t, 5])/(s^3 t^2) + (
+    12 (107 s - 222 t) SUNSET[s, 5])/(s^4 t^2) + (
+    12 (247 s^2 - 222 s t + 107 t^2) SUNSET[t, 5])/(s^3 t^4) + (
+    42 (6 s + 5 t) TRI[s, 5])/(s^3 t^2))
+
+(210 SUNSET[s, 5])/(s^4 t) + (210 SUNSET[t, 5])/(s^2 t^3) - (15 TRI[s, 5])/(
+ s^3 t) + \[Epsilon] (-((24 CUP[s, t, 5])/(s t^2)) + (
+    6 (s + t)^2 DIAG[s, t, 5])/(s^3 t^2) - (6 (70 s + 247 t) SUNSET[s, 5])/(
+    s^4 t^2) - (6 (70 s^2 + 247 s t + 70 t^2) SUNSET[t, 5])/(s^3 t^4) - (
+    3 (20 s - 31 t) TRI[s, 5])/(s^3 t^2)) + \[Epsilon]^2 ((120 CUP[s, t, 5])/(
+    s t^2) - (36 (s + t)^2 DIAG[s, t, 5])/(s^3 t^2) + (
+    12 (107 s - 222 t) SUNSET[s, 5])/(s^4 t^2) + (
+    12 (247 s^2 - 222 s t + 107 t^2) SUNSET[t, 5])/(s^3 t^4) + (
+    42 (6 s + 5 t) TRI[s, 5])/(s^3 t^2))
+
+decA4 /. intrep3
+
+-((2 \[Epsilon] SUNSET[t, 3])/t^2) + (12 \[Epsilon]^2 SUNSET[t, 3])/t^2
+
+decB1 /. intrep7
+
+(240240 SUNSET[s, 7])/(s^7 t) + (240240 SUNSET[t, 7])/(s^3 t^5) + (
+ 3465 TRI[s, 7])/(
+ s^6 t) + \[Epsilon]^2 ((96 (1167 s^2 - 1408 s t - 736 t^2) CUP[s, t, 7])/(
+    s^4 t^4) - (144 (5 s - 2 t) DBN[s, t, 7])/(
+    s^4 t^2) + (23256/s^6 - 43272/(s^2 t^4) - 145080/(s^3 t^3) - 143136/(
+       s^4 t^2) - 18072/(s^5 t)) DIAG[s, t, 
+      7] + (64/s^4 - 840/(s^2 t^2) + 240/(s^3 t)) DOUBLEBOX[s, t, 7] - (
+    512 (25 s + 14 t) GLASS[s, 7])/(s^6 t^2) + (
+    8 (314162 s^3 + 1161191 s^2 t + 1666298 s t^2 - 1446974 t^3) SUNSET[s, 
+      7])/(3 s^7 t^4) + (
+    8 (711483 s^4 - 1240142 s^3 t + 1421768 s^2 t^2 - 112081 s t^3 - 
+       214366 t^4) SUNSET[t, 7])/(
+    3 s^6 t^6) + ((200912 s^3 - 389252 s^2 t + 72922 s t^2 - 81759 t^3) TRI[s,
+       7])/(s^6 t^4)) + \[Epsilon] (-((20160 CUP[s, t, 7])/(s^2 t^4)) + (
+    7560 (s^4 + 4 s^3 t + 6 s^2 t^2 + 4 s t^3 + t^4) DIAG[s, t, 7])/(
+    s^6 t^4) - (
+    8 (20020 s^3 + 90090 s^2 t + 180180 s t^2 + 287211 t^3) SUNSET[s, 7])/(
+    s^7 t^4) - (
+    8 (30030 s^4 + 167091 s^3 t + 180180 s^2 t^2 + 90090 s t^3 + 
+       20020 t^4) SUNSET[t, 7])/(s^6 t^6) - (
+    3 (24640 s^3 - 18480 s^2 t + 9240 s t^2 + 7167 t^3) TRI[s, 7])/(2 s^6 t^4)
+    )
+
+
+
+Master integrals in various dimensions
+
+For the master integrals we compute the order in \[Epsilon] necessary to find the O[\[Epsilon]]^0 in the final result.
+
+Clear[SUNSET, TRI, GLASS, CUP, DIAG, DBN, DOUBLEBOX]
+
+SUNSET[q2_, 
+   d_] := (q2)^(-2 \[Epsilon]) (
+    Gamma[1/2 - \[Epsilon]]^3 Gamma[2 \[Epsilon]])/
+    Gamma[3/2 - 3 \[Epsilon]] /. \[Epsilon] -> (3 - d)/2 + \[Epsilon];
+TRI[q2_, d_] := -(1/q2) (q2)^(-2 \[Epsilon]) (
+    Gamma[1/2 - \[Epsilon]]^2 Gamma[-2 \[Epsilon]] Gamma[
+      3/2 + \[Epsilon]] Gamma[
+      2 + 2 \[Epsilon]])/(\[Epsilon] (1 + 2 \[Epsilon])^2 Gamma[
+      1/2 - 3 \[Epsilon]]) /. \[Epsilon] -> (3 - d)/2 + \[Epsilon];
+GLASS[q2_, d_] := 
+  1/q2 (q2)^(-2 \[Epsilon]) (
+    Gamma[1/2 - \[Epsilon]]^4 Gamma[1/2 + \[Epsilon]]^2)/
+    Gamma[1 - 2 \[Epsilon]]^2 /. \[Epsilon] -> (3 - d)/2 + \[Epsilon];
+CUP[s_, t_, 5] := \[Pi] (1/s)^(
+   2 \[Epsilon]) (-(1/(6 \[Epsilon])) + O[\[Epsilon]]^0 /. y -> t/s);
+CUP[s_, t_, 
+   7] := \[Pi] (1/s)^(-2 + 
+     2 \[Epsilon]) ((8 - 6 y + 3 y^2)/(7560 \[Epsilon]) + O[\[Epsilon]]^0) /. 
+   y -> t/s;
+DIAG[s_, t_, 
+  5] := (1/s)^(2 \[Epsilon]) (\[Pi]/(3 \[Epsilon]) + O[\[Epsilon]]^0) /. 
+  y -> t/s
+DIAG[s_, t_, 
+  7] := (1/s)^(-2 + 
+    2 \[Epsilon]) ((\[Pi] (2 + y + 2 y^2))/(11340 \[Epsilon]) + 
+     O[\[Epsilon]]^0) /. y -> t/s
+DBN[s_, t_, 5] := O[\[Epsilon]]^0
+DBN[s_, t_, 7] := 2123124245123/\[Epsilon] + O[\[Epsilon]]^0
+DOUBLEBOX[s_, t_, 5] := O[\[Epsilon]]^0
+DOUBLEBOX[s_, t_, 7] := \[Pi]/(20 \[Epsilon]) + O[\[Epsilon]]^0
+
+Final result
+
+a2 = Series[
+    E^(2 EulerGamma \[Epsilon]) decA2 /. intrep5 /. \[Mu]2 -> 1, {\[Epsilon], 
+     0, 0}] // FunctionExpand // FullSimplify
+a3 = Series[
+    E^(2 EulerGamma \[Epsilon]) decA3 /. intrep5 /. \[Mu]2 -> 1, {\[Epsilon], 
+     0, 0}] // FunctionExpand // FullSimplify
+
+SeriesData[\[Epsilon], 0, {
+ Pi (s^(-2)/t), ((((-2) Pi) s^(-2)) t^(-2)) (
+   s - t (1 + Log[4]) + t Log[t])}, -1, 1, 1]
+
+SeriesData[\[Epsilon], 0, {
+ Pi (s^(-2)/t), ((((-2) Pi) s^(-2)) t^(-2)) (
+   s - t (1 + Log[4]) + t Log[t])}, -1, 1, 1]
+
+a4 = Series[
+  E^(2 EulerGamma \[Epsilon]) decA4 /. intrep3 /. \[Mu]2 -> 1, {\[Epsilon], 0,
+    0}]
+
+SeriesData[\[Epsilon], 0, {((-2) Pi) t^(-2)}, 0, 1, 1]
+
+b1 = Series[
+    E^(2 EulerGamma \[Epsilon]) decB1 /. intrep7 /. \[Mu]2 -> 1, {\[Epsilon], 
+     0, 0}] // FunctionExpand // FullSimplify
+
+SeriesData[\[Epsilon], 0, {(2 Pi) (s^(-3)/t), ((((-2) Pi) s^(-3)) t^(-2)) (
+   s - (2 t) (1 + Log[4]) + (2 t) Log[t])}, -1, 1, 1]
+
+s^3 (-s - t) b1 - s^2 (-t - s) a2 - s^2 (-t - s) a3 + 
+  s (-s - t) a4 // FullSimplify
+
+SeriesData[\[Epsilon], 0, {}, 1, 1, 1]
+
+a1 = -1/2 s^(-3 - 2 ep) (
+SeriesData[
+     MB`ep, 0, {
+      2 (Pi/y), ((4 Pi)/y) Log[2] - ((2 Pi)/y) Log[
+        y], (-8) (Pi/y) + Rational[-8, 3] (Pi^3/y) + ((8 Pi)/y) Log[2] - ((
+         8 Pi)/y) Log[2]^2 - ((4 Pi)/y) Log[y]}, -2, 1, 1]) /. y -> t/s /. 
+  ep -> \[Epsilon]
+
+SeriesData[\[Epsilon], 0, {(-Pi) (
+   s^(-2)/t), (((2 Pi) s^(-2))/t) Log[s] + (
+    Rational[1, 2]
+      s^(-3)) (((((-4) Pi) s)/t) Log[2] + (((2 Pi) s)/t) Log[
+      s^(-1) t]), ((((-2) Pi) s^(-2))/t) Log[s]^2 - (
+   s^(-3) Log[s]) (((((-4) Pi) s)/t) Log[2] + (((2 Pi) s)/t) Log[s^(-1) t]) + (
+    Rational[1, 2]
+      s^(-3)) ((8 Pi) (s/t) + (Rational[8, 3] Pi^3) (s/t) - (((8 Pi) s)/t)
+      Log[2] + (((8 Pi) s)/t) Log[2]^2 + (((4 Pi) s)/t) Log[
+      s^(-1) t])}, -2, 1, 1]
+
+dec = (1 - 2 \[Epsilon]) s^2 t a1 + s^3 (-s - t) b1 - s^2 (-t - s) a2 - 
+     s^2 (-t - s) a3 + s (-s - t) a4 // ExpandAll // PowerExpand // ExpandAll
+
+SeriesData[\[Epsilon], 0, {-Pi, ((-2) Pi) Log[2] + Pi Log[s] + Pi Log[t], 
+  4 Pi + Rational[4, 3] Pi^3 - (4 Pi) Log[2] + (4 Pi) Log[2]^2 - (2 Pi) Log[
+   s] + ((4 Pi) Log[2]) Log[s] + (2 Pi) Log[t] - ((2 Pi) Log[s]) Log[
+   t]}, -2, 1, 1]
+
+Series[dec, {\[Epsilon], 0, 0}]
+Normal[Series[% + 
+     4 \[Pi] (s)^(-2 \[Epsilon]) (1/(4 \[Epsilon]^2) - (
+        1 - Log[2] - 1/2 Log[s] + 1/2 Log[t])/(2 \[Epsilon]) - 1 - 2 Zeta[2] -
+         Log[2]^2), {\[Epsilon], 0, 0}] // ExpandAll // FullSimplify]
+
+SeriesData[\[Epsilon], 0, {-Pi, 2 Pi - (2 Pi) Log[2] + Pi Log[s] + Pi Log[t], 
+  Rational[2, 3] (
+   6 Pi + 2 Pi^3 + (6 Pi) Log[2]^2 - (6 Pi) Log[
+    s] + ((6 Pi) Log[2]) Log[s] - ((3 Pi) Log[s]) Log[t])}, -2, 1, 1]
+
+0
+
+
+
+CUP master integral in 5d and 7d-divergent part
+
+Quit
+
+<< MB.m
+
+MB 1.2
+
+by Michal Czakon
+
+improvements by Alexander Smirnov
+
+more info in hep-ph/0511200
+
+last modified 2 Jan 09
+
+int5 = repr[0, 1, \[Delta], 1, 1, 1, 1, 0, 5 - 2 ep]
+
+(y^z1 Gamma[-z1] Gamma[1 + z1] Gamma[-(1/2) - ep - z1 - z2] Gamma[
+    3/2 - ep + z2] Gamma[-(1/2) - ep - z1 - z3] Gamma[1 + z1 - z4] Gamma[
+    3/2 + ep + z1 - z4] Gamma[-z2 - z3 - z4] Gamma[z2 + z4] Gamma[
+    1 + z1 + z2 + z3 + z4] Gamma[
+    3/2 - ep + z3 - \[Delta]] Gamma[-(3/2) + ep + z4 + \[Delta]])/(Gamma[
+    1 - 2 ep] Gamma[4 - 2 ep + z1 - z4 - \[Delta]] Gamma[z2 + z4 + \[Delta]])
+
+int7 = repr[0, 1, \[Delta], 1, 1, 1, 1, 0, 7 - 2 ep]
+
+(y^z1 Gamma[-z1] Gamma[1 + z1] Gamma[1/2 - ep - z1 - z2] Gamma[
+    5/2 - ep + z2] Gamma[1/2 - ep - z1 - z3] Gamma[1 + z1 - z4] Gamma[
+    1/2 + ep + z1 - z4] Gamma[-z2 - z3 - z4] Gamma[z2 + z4] Gamma[
+    1 + z1 + z2 + z3 + z4] Gamma[
+    5/2 - ep + z3 - \[Delta]] Gamma[-(5/2) + ep + z4 + \[Delta]])/(Gamma[
+    3 - 2 ep] Gamma[6 - 2 ep + z1 - z4 - \[Delta]] Gamma[z2 + z4 + \[Delta]])
+
+rules5 = MBcorrectContours[
+  MBoptimizedRules[int5, \[Delta] -> 0, {}, {\[Delta], ep}], 10000]
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+General::stop: Further output of MBrules::norules will be suppressed during this calculation. >>
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[-1-z3+\[Delta]]
+
+{{\[Delta] -> 41/128, ep -> 17/64}, {z1 -> -(104713/1675664), 
+  z2 -> -(1361643/1675888), z3 -> -(3037979/3352288), z4 -> 6180963/6704704}}
+
+rules7 = MBcorrectContours[
+  MBoptimizedRules[int7, \[Delta] -> 0, {}, {\[Delta], ep}], 10000]
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+General::stop: Further output of MBrules::norules will be suppressed during this calculation. >>
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[-1-z3+\[Delta]]
+
+{{\[Delta] -> 41/128, ep -> 81/64}, {z1 -> -(104713/1675664), 
+  z2 -> -(1361643/1675888), z3 -> -(3037979/3352288), z4 -> 6180963/6704704}}
+
+MBexpand[MBcontinue[int5, \[Delta] -> 0, rules5, Verbose -> False], 
+   1, {\[Delta], 0, 0}] // MBmerge;
+ints5 = MBmerge[
+    MBexpand[MBcontinue[#[[1]], ep -> 0, #[[2]], Verbose -> False] & /@ %, 
+     1, {ep, 0, -1}]] // MBapplyBarnes // MBmerge
+
+{MBint[-(\[Pi]/(6 ep)), {{\[Delta] -> 0, ep -> 0}, {}}]}
+
+MBexpand[MBcontinue[int7, \[Delta] -> 0, rules7, Verbose -> False], 
+   1, {\[Delta], 0, 0}] // MBmerge;
+ints7 = MBmerge[
+    MBexpand[MBcontinue[#[[1]], ep -> 0, #[[2]], Verbose -> False] & /@ %, 
+     1, {ep, 0, -1}]] // MBapplyBarnes // MBmerge
+
+{MBint[(\[Pi] (8 - 6 y + 3 y^2))/(7560 ep), {{\[Delta] -> 0, ep -> 0}, {}}]}
+
+DIAG master integral in 5d and 7d-divergent part
+
+<< MB.m
+
+MB 1.2
+
+by Michal Czakon
+
+improvements by Alexander Smirnov
+
+more info in hep-ph/0511200
+
+last modified 2 Jan 09
+
+exp15 = repr[0, 1, 1, \[Delta], 1, 1, 1, 0, 5 - 2 ep]
+
+(y^z1 Gamma[-z1] Gamma[1 + z1] Gamma[-(1/2) - ep - z1 - z2] Gamma[
+    3/2 - ep + z2] Gamma[1/2 - ep + z3] Gamma[
+    1 + z1 - z4] Gamma[-z2 - z3 - z4] Gamma[-(1/2) + ep + z4] Gamma[
+    z2 + z4] Gamma[1 + z1 + z2 + z3 + z4] Gamma[
+    1/2 - ep - z1 - z3 - \[Delta]] Gamma[
+    1/2 + ep + z1 - z4 + \[Delta]])/(Gamma[3 - 2 ep + z1 - z4] Gamma[
+    1 + z2 + z4] Gamma[2 - 2 ep - \[Delta]] Gamma[\[Delta]])
+
+exp17 = repr[0, 1, 1, \[Delta], 1, 1, 1, 0, 7 - 2 ep]
+
+(y^z1 Gamma[-z1] Gamma[1 + z1] Gamma[1/2 - ep - z1 - z2] Gamma[
+    5/2 - ep + z2] Gamma[3/2 - ep + z3] Gamma[
+    1 + z1 - z4] Gamma[-z2 - z3 - z4] Gamma[-(3/2) + ep + z4] Gamma[
+    z2 + z4] Gamma[1 + z1 + z2 + z3 + z4] Gamma[
+    3/2 - ep - z1 - z3 - \[Delta]] Gamma[-(1/2) + ep + z1 - 
+     z4 + \[Delta]])/(Gamma[5 - 2 ep + z1 - z4] Gamma[1 + z2 + z4] Gamma[
+    4 - 2 ep - \[Delta]] Gamma[\[Delta]])
+
+rules5 = MBcorrectContours[
+  MBoptimizedRules[exp15, \[Delta] -> 0, {}, {\[Delta], ep}], 10000]
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[1/2-ep+z2]
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+{{\[Delta] -> 17/64, ep -> 9/32}, {z1 -> -(104713/1675664), 
+  z2 -> -(2828029/3351776), z3 -> -(314245/3352288), z4 -> 733335/838088}}
+
+rules7 = MBcorrectContours[
+  MBoptimizedRules[exp17, \[Delta] -> 0, {}, {\[Delta], ep}], 10000]
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[3/2-ep+z2]
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+{{\[Delta] -> 17/64, ep -> 41/32}, {z1 -> -(104713/1675664), 
+  z2 -> -(2828029/3351776), z3 -> -(314245/3352288), z4 -> 733335/838088}}
+
+MBexpand[MBcontinue[exp15, \[Delta] -> 0, rules5], 
+  1, {\[Delta], 0, 0}] // MBmerge
+ints5 = MBexpand[MBcontinue[#[[1]], ep -> 0, #[[2]]] & /@ %, 1, {ep, 0, -1}] //
+    MBapplyBarnes // MBmerge
+
+Level 1
+
+Taking -residue in z4 = 1/2+ep+z1+\[Delta]
+
+Level 2
+
+Integral {1}
+
+Taking +residue in z2 = -(1/2)-ep-z1-\[Delta]
+
+Level 3
+
+Integral {1,1}
+
+3 integral(s) found
+
+{MBint[1/(Gamma[5/2 - 3 ep] Gamma[2 - 2 ep])
+    y^z1 Gamma[1/2 - ep] Gamma[1 - 2 ep - z1] Gamma[-z1] Gamma[1 + z1] Gamma[
+     2 ep + z1] Gamma[1/2 - ep - z1 - z3] Gamma[-z3] Gamma[
+     1/2 - ep + z3] Gamma[1 + z1 + z3], {{\[Delta] -> 0, 
+    ep -> 9/32}, {z1 -> -(104713/1675664), z3 -> -(314245/3352288)}}]}
+
+Level 1
+
+Taking +residue in z1 = -2 ep
+
+Level 2
+
+Integral {1}
+
+2 integral(s) found
+
+{MBint[\[Pi]/(3 ep), {{\[Delta] -> 0, ep -> 0}, {}}]}
+
+MBexpand[MBcontinue[exp17, \[Delta] -> 0, rules7], 
+  1, {\[Delta], 0, 0}] // MBmerge
+ints7 = MBexpand[MBcontinue[#[[1]], ep -> 0, #[[2]]] & /@ %, 1, {ep, 0, -1}] //
+    MBapplyBarnes // MBmerge
+
+Level 1
+
+Taking -residue in z4 = -(1/2)+ep+z1+\[Delta]
+
+Level 2
+
+Integral {1}
+
+Taking +residue in z2 = 1/2-ep-z1-\[Delta]
+
+Level 3
+
+Integral {1,1}
+
+3 integral(s) found
+
+{MBint[1/(Gamma[11/2 - 3 ep] Gamma[4 - 2 ep])
+    y^z1 Gamma[3/2 - ep] Gamma[3 - 2 ep - z1] Gamma[-z1] Gamma[
+     1 + z1] Gamma[-2 + 2 ep + z1] Gamma[3/2 - ep - z1 - z3] Gamma[-z3] Gamma[
+     3/2 - ep + z3] Gamma[1 + z1 + z3], {{\[Delta] -> 0, 
+    ep -> 41/32}, {z1 -> -(104713/1675664), z3 -> -(314245/3352288)}}]}
+
+Level 1
+
+Taking +residue in z1 = 2-2 ep
+
+Taking +residue in z1 = 1-2 ep
+
+Taking +residue in z1 = -2 ep
+
+Level 2
+
+Integral {1}
+
+Taking -residue in z3 = -(1/2)+ep
+
+Integral {2}
+
+Integral {3}
+
+Level 3
+
+Integral {1,1}
+
+5 integral(s) found
+
+{MBint[(\[Pi] (2 + y + 2 y^2))/(11340 ep), {{\[Delta] -> 0, ep -> 0}, {}}]}
+
+DBN master integral in 5d and 7d-divergent part
+
+Quit
+
+<< MB.m
+
+MB 1.2
+
+by Michal Czakon
+
+improvements by Alexander Smirnov
+
+more info in hep-ph/0511200
+
+last modified 2 Jan 09
+
+MB5 = repr[1, 1, 1, 1, 1, 1, 1, -1 + \[Delta], 5 - 2 ep] // Simplify
+
+(y^z1 Gamma[-z1] Gamma[
+    1 + z1] Gamma[-(1/2) - ep - z1 - z2] Gamma[-(1/2) - ep - z1 - z3] Gamma[
+    1 + z1 - z4] Gamma[3/2 + ep + z1 - z4] Gamma[-z1 - z2 - z3 - z4] Gamma[
+    z2 + z4] Gamma[z3 + z4] Gamma[1 + z1 + z2 + z3 + z4] Gamma[
+    3/2 - ep + z2 - \[Delta]] Gamma[
+    3/2 - ep + z3 - \[Delta]] Gamma[-1 - z2 - z3 - 
+     z4 + \[Delta]] Gamma[-(1/2) + ep + z4 + \[Delta]])/(Gamma[
+    1 - 2 ep] Gamma[1 + z2 + z4] Gamma[1 + z3 + z4] Gamma[
+    3 - 2 ep + z1 - z4 - \[Delta]] Gamma[-1 - z1 - z2 - z3 - z4 + \[Delta]])
+
+MB7 = repr[1, 1, 1, 1, 1, 1, 1, -1 + \[Delta], 7 - 2 ep] // Simplify
+
+(y^z1 Gamma[-z1] Gamma[1 + z1] Gamma[1/2 - ep - z1 - z2] Gamma[
+    1/2 - ep - z1 - z3] Gamma[1 + z1 - z4] Gamma[
+    1/2 + ep + z1 - z4] Gamma[-z1 - z2 - z3 - z4] Gamma[z2 + z4] Gamma[
+    z3 + z4] Gamma[1 + z1 + z2 + z3 + z4] Gamma[
+    5/2 - ep + z2 - \[Delta]] Gamma[
+    5/2 - ep + z3 - \[Delta]] Gamma[-1 - z2 - z3 - 
+     z4 + \[Delta]] Gamma[-(3/2) + ep + z4 + \[Delta]])/(Gamma[
+    3 - 2 ep] Gamma[1 + z2 + z4] Gamma[1 + z3 + z4] Gamma[
+    5 - 2 ep + z1 - z4 - \[Delta]] Gamma[-1 - z1 - z2 - z3 - z4 + \[Delta]])
+
+rules5 = MBcorrectContours[
+  MBoptimizedRules[MB5, \[Delta] -> 0, {}, {\[Delta], ep}], 10000]
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[-1-z2-z3-z4+\[Delta]]
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+General::stop: Further output of MBrules::norules will be suppressed during this calculation. >>
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[-1-z3+\[Delta]]
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[-1-z3+\[Delta]]
+
+General::stop: Further output of MBresidues::contour will be suppressed during this calculation. >>
+
+{{\[Delta] -> 1447/4608, ep -> 1343/4608}, {z1 -> -(6178435/60323904), 
+  z2 -> -(379060309/482655744), z3 -> -(198096965/241364736), 
+  z4 -> 34047709/40228224}}
+
+rules7 = MBcorrectContours[
+  MBoptimizedRules[MB7, \[Delta] -> 0, {}, {\[Delta], ep}], 10000]
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[-1-z2-z3-z4+\[Delta]]
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+General::stop: Further output of MBrules::norules will be suppressed during this calculation. >>
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[-1-z3+\[Delta]]
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[-1-z3+\[Delta]]
+
+General::stop: Further output of MBresidues::contour will be suppressed during this calculation. >>
+
+{{\[Delta] -> 1447/4608, ep -> 5951/4608}, {z1 -> -(6178435/60323904), 
+  z2 -> -(379060309/482655744), z3 -> -(198096965/241364736), 
+  z4 -> 34047709/40228224}}
+
+MBexpand[MBcontinue[MB5, \[Delta] -> 0, rules5, Verbose -> False], 
+   1, {\[Delta], 0, 0}] // MBmerge;
+ints5 = MBmerge[
+    MBexpand[MBcontinue[#[[1]], ep -> 0, #[[2]], Verbose -> False] & /@ %, 
+     1, {ep, 0, 0}]] // MBmerge;
+
+MBexpand[MBcontinue[MB7, \[Delta] -> 0, rules7, Verbose -> False], 
+   1, {\[Delta], 0, 0}] // MBmerge;
+ints7 = MBmerge[
+    MBexpand[MBcontinue[#[[1]], ep -> 0, #[[2]], Verbose -> False] & /@ %, 
+     1, {ep, 0, 0}]] // MBmerge;
+
+MBintegrate[ints5, {y -> 0.32}, Verbose -> False]
+
+{24.734, {0.00452456, 0}}
+
+MBintegrate[ints7, {y -> 0.32}, Verbose -> False]
+
+{0.0744591 - 0.0179517/ep, {0.000141118 + 2.93306*10^-6/ep, 0}}
+
+DOUBLEBOX master integral in 5d and 7d-divergent part (actually we just show they are finite)
+
+<< MB.m
+
+MB 1.2
+
+by Michal Czakon
+
+improvements by Alexander Smirnov
+
+more info in hep-ph/0511200
+
+last modified 2 Jan 09
+
+MB5 = repr[1, 1, 1, 1, 1, 1, 1, 0, 5 - 2 ep] // Simplify
+
+(y^z1 Gamma[-z1] Gamma[1 + z1] Gamma[-(1/2) - ep - z1 - z2] Gamma[
+    1/2 - ep + z2] Gamma[-(1/2) - ep - z1 - z3] Gamma[1/2 - ep + z3] Gamma[
+    1 + z1 - z4] Gamma[3/2 + ep + z1 - z4] Gamma[-z2 - z3 - z4] Gamma[
+    1/2 + ep + z4] Gamma[z2 + z4] Gamma[z3 + z4] Gamma[
+    1 + z1 + z2 + z3 + z4])/(Gamma[1 - 2 ep] Gamma[2 - 2 ep + z1 - z4] Gamma[
+    1 + z2 + z4] Gamma[1 + z3 + z4])
+
+MB7 = repr[1, 1, 1, 1, 1, 1, 1, 0, 7 - 2 ep] // Simplify
+
+(y^z1 Gamma[-z1] Gamma[1 + z1] Gamma[1/2 - ep - z1 - z2] Gamma[
+    3/2 - ep + z2] Gamma[1/2 - ep - z1 - z3] Gamma[3/2 - ep + z3] Gamma[
+    1 + z1 - z4] Gamma[
+    1/2 + ep + z1 - z4] Gamma[-z2 - z3 - z4] Gamma[-(1/2) + ep + z4] Gamma[
+    z2 + z4] Gamma[z3 + z4] Gamma[1 + z1 + z2 + z3 + z4])/(Gamma[
+    3 - 2 ep] Gamma[4 - 2 ep + z1 - z4] Gamma[1 + z2 + z4] Gamma[1 + z3 + z4])
+
+rules5 = MBoptimizedRules[MB5, ep -> 0, {}, {ep}]
+
+{{ep -> -(1/16)}, {z1 -> -(1/2), z2 -> -(5/16), z3 -> -(3/8), z4 -> 7/16}}
+
+rules7 = MBoptimizedRules[MB7, ep -> 0, {}, {ep}]
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[1/2+ep+z1]
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+General::stop: Further output of MBrules::norules will be suppressed during this calculation. >>
+
+{{ep -> 31/64}, {z1 -> -(1/64), z2 -> -(19/64), z3 -> -(21/64), z4 -> 23/64}}
+
+MBexpand[MBcontinue[MB5, ep -> 0, rules5, Verbose -> False], 1, {ep, 0, 0}] //
+   MBapplyBarnes // MBmerge
+
+{MBint[(y^z1 Gamma[-z1]^2 Gamma[
+      1 + z1]^2 Gamma[-(1/2) - z1 - z3] Gamma[-z3] Gamma[1/2 + z3] Gamma[
+      1 + z1 - z4] Gamma[3/2 + z1 - z4] Gamma[
+      1/2 - z3 - z4] Gamma[-(1/2) - z1 + z4] Gamma[z3 + z4] Gamma[
+      1/2 + z3 + z4])/(Gamma[-z1 - z3] Gamma[2 + z1 - z4] Gamma[
+      1 + z3 + z4]), {{ep -> 0}, {z1 -> -(1/2), z3 -> -(3/8), z4 -> 7/16}}]}
+
+MBexpand[MBcontinue[MB7, ep -> 0, rules7, Verbose -> False], 1, {ep, 0, -1}] //
+   MBapplyBarnes // MBmerge
+
+{MBint[\[Pi]/(20 ep), {{ep -> 0}, {}}]}
+
+Numerical checks of A2 and A3- OK
+
+
+A2 = G[{1, 1, \[Delta], 2, 1, 2, 1, 0, 0}] + 
+   G[{1, 2, \[Delta], 1, 1, 2, 1, 0, 0}] + 
+   G[{1, 2, \[Delta], 1, 2, 1, 1, 0, 0}] + 
+   G[{1, 2, \[Delta], 2, 1, 1, 1, 0, 0}];
+A3 = +G[{\[Delta], 1, 1, 2, 1, 1, 2, 0, 0}] + 
+   G[{\[Delta], 1, 1, 2, 1, 2, 1, 0, 0}] + 
+   G[{\[Delta], 2, 1, 1, 1, 2, 1, 0, 0}] + 
+   G[{\[Delta], 2, 1, 2, 1, 1, 1, 0, 0}];
+repr[a1_, a2_, a3_, a4_, a5_, a6_, a7_, a8_, d_] := 
+ 1/(Gamma[a2] Gamma[a4] Gamma[a5] Gamma[a6] Gamma[a7] Gamma[
+      4 - a4 - a5 - a6 - a7 - 2 \[Epsilon]4]) 1/(
+    Gamma[a1 + z3 + z4] Gamma[a3 + z2 + z4] Gamma[
+      4 - a1 - a2 - a3 - a8 - 2 \[Epsilon]4 + z1 - z4] Gamma[
+      a8 - z1 - z2 - z3 - z4]) y^
+    z1 Gamma[a2 + z1] Gamma[-z1] Gamma[z2 + z4] Gamma[z3 + z4] Gamma[
+     a1 + a2 + a3 + a8 - 2 + \[Epsilon]4 + z4] Gamma[a7 + z1 - z4] Gamma[
+     a8 - z2 - z3 - z4] Gamma[
+     a5 + z1 + z2 + z3 + z4] Gamma[-z1 - z2 - z3 - z4] Gamma[
+     a4 + a5 + a6 + a7 - 2 + \[Epsilon]4 + z1 - z4] Gamma[
+     2 - a1 - a2 - a8 - \[Epsilon]4 + z2] Gamma[
+     2 - a2 - a3 - a8 - \[Epsilon]4 + z3] Gamma[
+     2 - a5 - a6 - a7 - \[Epsilon]4 - z1 - z2] Gamma[
+     2 - a4 - a5 - a7 - \[Epsilon]4 - z1 - z3] /. \[Epsilon]4 -> (4 - d)/2 // 
+  Simplify
+
+mapFIREMB[A_] := 
+ A /. G[{a1_, a2_, a3_, a4_, a5_, a6_, a7_, 0, a9_}] :> 
+   Repr[a2, a7, a1, a3, a5, a4, a6, a9, d]
+
+<< MB.m
+
+MB 1.2
+
+by Michal Czakon
+
+improvements by Alexander Smirnov
+
+more info in hep-ph/0511200
+
+last modified 2 Jan 09
+
+ia2 = mapFIREMB /@ List @@ A2 /. {Repr -> repr, d -> 5 - 2 ep};
+ia3 = mapFIREMB /@ List @@ A3 /. {Repr -> repr, d -> 5 - 2 ep}
+
+{(y^z1 Gamma[-z1] Gamma[
+     2 + z1] Gamma[-(3/2) - ep - z1 - z2] Gamma[-(1/2) - ep + 
+      z2] Gamma[-(1/2) - ep - z1 - z3] Gamma[1 + z1 - z4] Gamma[
+     5/2 + ep + z1 - z4] Gamma[-z2 - z3 - z4] Gamma[z2 + z4] Gamma[
+     z3 + z4] Gamma[1 + z1 + z2 + z3 + z4] Gamma[
+     1/2 - ep + z3 - \[Delta]] Gamma[
+     1/2 + ep + z4 + \[Delta]])/(Gamma[-2 ep] Gamma[1 + z3 + z4] Gamma[
+     2 - 2 ep + z1 - z4 - \[Delta]] Gamma[z2 + z4 + \[Delta]]), (y^
+    z1 Gamma[-z1] Gamma[1 + z1] Gamma[-(5/2) - ep - z1 - z2] Gamma[
+     1/2 - ep + z2] Gamma[-(3/2) - ep - z1 - z3] Gamma[2 + z1 - z4] Gamma[
+     7/2 + ep + z1 - z4] Gamma[-z2 - z3 - z4] Gamma[z2 + z4] Gamma[
+     z3 + z4] Gamma[1 + z1 + z2 + z3 + z4] Gamma[
+     3/2 - ep + z3 - \[Delta]] Gamma[-(1/2) + ep + 
+      z4 + \[Delta]])/(Gamma[-1 - 2 ep] Gamma[1 + z3 + z4] Gamma[
+     3 - 2 ep + z1 - z4 - \[Delta]] Gamma[z2 + z4 + \[Delta]]), (y^
+    z1 Gamma[-z1] Gamma[
+     1 + z1] Gamma[-(3/2) - ep - z1 - z2] Gamma[-(1/2) - ep + 
+      z2] Gamma[-(3/2) - ep - z1 - z3] Gamma[2 + z1 - z4] Gamma[
+     5/2 + ep + z1 - z4] Gamma[-z2 - z3 - z4] Gamma[z2 + z4] Gamma[
+     z3 + z4] Gamma[1 + z1 + z2 + z3 + z4] Gamma[
+     3/2 - ep + z3 - \[Delta]] Gamma[
+     1/2 + ep + z4 + \[Delta]])/(Gamma[-2 ep] Gamma[2 + z3 + z4] Gamma[
+     2 - 2 ep + z1 - z4 - \[Delta]] Gamma[z2 + z4 + \[Delta]]), (y^
+    z1 Gamma[-z1] Gamma[
+     1 + z1] Gamma[-(3/2) - ep - z1 - z2] Gamma[-(1/2) - ep + 
+      z2] Gamma[-(1/2) - ep - z1 - z3] Gamma[1 + z1 - z4] Gamma[
+     5/2 + ep + z1 - z4] Gamma[-z2 - z3 - z4] Gamma[z2 + z4] Gamma[
+     z3 + z4] Gamma[1 + z1 + z2 + z3 + z4] Gamma[
+     3/2 - ep + z3 - \[Delta]] Gamma[
+     1/2 + ep + z4 + \[Delta]])/(Gamma[-2 ep] Gamma[2 + z3 + z4] Gamma[
+     2 - 2 ep + z1 - z4 - \[Delta]] Gamma[z2 + z4 + \[Delta]])}
+
+rules2 = MBcorrectContours[
+    MBoptimizedRules[#, \[Delta] -> 0, {}, {\[Delta], ep}], 10000] & /@ ia2
+rules3 = MBcorrectContours[
+    MBoptimizedRules[#, \[Delta] -> 0, {}, {\[Delta], ep}], 10000] & /@ ia3
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[-(5/2)-3 ep+z2+z3-\[Delta]]
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+General::stop: Further output of MBrules::norules will be suppressed during this calculation. >>
+
+{{{\[Delta] -> 7/8, ep -> -1}, {z1 -> -(104727/209458), 
+   z2 -> -(1780615/1675888), z3 -> -(314261/1676144), 
+   z4 -> 942857/838088}}, {{\[Delta] -> 29/64, 
+   ep -> -(33/32)}, {z1 -> -(104721/837832), z2 -> -(1571113/3351776), 
+   z3 -> -(314245/3352288), z4 -> 104763/209522}}, {{\[Delta] -> 65/128, 
+   ep -> -(75/64)}, {z1 -> -(104697/3351328), z2 -> -(3665941/6703552), 
+   z3 -> -(314213/6704576), z4 -> 942865/1676176}}, {{\[Delta] -> 129/128, 
+   ep -> -(75/64)}, {z1 -> -(104697/3351328), z2 -> -(3665941/6703552), 
+   z3 -> -(314213/6704576), z4 -> 942865/1676176}}}
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[3/2+ep+z1+\[Delta]]
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[3/2+ep+z1+\[Delta]]
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[3/2+ep+z1+\[Delta]]
+
+General::stop: Further output of MBresidues::contour will be suppressed during this calculation. >>
+
+{{{\[Delta] -> 55/128, ep -> -(27/32)}, {z1 -> -(104727/209458), 
+   z2 -> -(733169/3351776), z3 -> -(2409393/6704576), 
+   z4 -> 1571447/3352352}}, {{\[Delta] -> 25/32, 
+   ep -> -(37/32)}, {z1 -> -(104713/1675664), z2 -> -(5132375/3351776), 
+   z3 -> -(2828461/3352288), z4 -> 6390453/3352352}}, {{\[Delta] -> 35/64, 
+   ep -> -(15/16)}, {z1 -> -(104727/209458), z2 -> -(314213/1675888), 
+   z3 -> -(2828461/3352288), z4 -> 1571431/1676176}}, {{\[Delta] -> 119/128, 
+   ep -> -(27/32)}, {z1 -> -(104727/209458), z2 -> -(733169/3351776), 
+   z3 -> -(2409393/6704576), z4 -> 1571447/3352352}}}
+
+
+ints2 = Table[
+   MBmerge[MBexpand[
+      MBcontinue[#[[1]], ep -> 0, #[[2]], 
+         Verbose -> False] & /@ (MBexpand[
+          MBcontinue[ia2[[i]], \[Delta] -> 0, rules2[[i]], Verbose -> False], 
+          1, {\[Delta], 0, 0}] // MBmerge), 1, {ep, 0, 0}]] // MBmerge, {i, 1,
+     Length[ia2]}];
+ints3 = Table[
+   MBmerge[MBexpand[
+      MBcontinue[#[[1]], ep -> 0, #[[2]], 
+         Verbose -> False] & /@ (MBexpand[
+          MBcontinue[ia3[[i]], \[Delta] -> 0, rules3[[i]], Verbose -> False], 
+          1, {\[Delta], 0, 0}] // MBmerge), 1, {ep, 0, 0}]] // MBmerge, {i, 1,
+     Length[ia3]}];
+
+MBintegrate[#, {y -> 0.32}, Verbose -> False] & /@ ints2
+Plus @@ %
+MBintegrate[#, {y -> 0.32}, Verbose -> False] & /@ ints3
+Plus @@ %
+
+{{-69.4076 - 17.1806/ep, 
+  0}, {-73.4994 + 6.74952/ep^2 + 29.9846/ep, {0.000254708, 0}}, {-193.256 + 
+   15.3398/ep^2 + 64.6884/ep, {0.000392266, 0}}, {332.697 - 22.0893/ep^2 - 
+   67.6749/ep, {0.000130324, 0}}}
+
+{-3.46529 + 9.81748/ep, {0.000777297, 0}}
+
+{{-193.256 + 15.3398/ep^2 + 64.6884/ep, {0.00236728, 0}}, {-73.4994 + 6.74952/
+   ep^2 + 29.9846/ep, {0.000462571, 0}}, {-69.4079 - 17.1806/ep, {0.00288222, 
+   0}}, {332.697 - 22.0893/ep^2 - 67.6749/ep, {0.00106759, 0}}}
+
+{-3.46549 + 9.81748/ep, {0.00677967, 0}}
+
+s^(3 + 2 \[Epsilon])
+      E^(-2 \[Epsilon] EulerGamma) (\[Pi]/(s^2 t \[Epsilon]) - (
+       2 (\[Pi] (s - t (1 + Log[4]) + t Log[t])))/(s^2 t^2) + 
+       SeriesData[\[Epsilon], 0, {}, -1, 1, 1]) /. t -> y s // FullSimplify //
+   PowerExpand // ExpandAll
+% /. y -> 0.32
+
+SeriesData[\[Epsilon], 0, {
+ Pi/y, ((-2) Pi) y^(-2) + 2 (Pi/y) - (2 EulerGamma) (
+   Pi/y) + ((4 Pi)/y) Log[2] - ((2 Pi)/y) Log[y]}, -1, 1, 1]
+
+SeriesData[\[Epsilon], 0, {9.817477042468104, -3.465314545936188}, -1, 1, 1]
+
+Numerical check of B1-OK
+
+B1 = 2 G[{1, 1 + \[Delta], 1, 3, 1, 2, 2, 0, 0}] + 
+   4 G[{1, 1, 1, 3 - \[Delta], 1, 3, 1, 0, 0}] + 
+   G[{1, 2 - \[Delta], 1, 2, 1, 2, 2, 0, 0}] + 
+   4 G[{1, 2 - \[Delta], 1, 2, 1, 3, 1, 0, 0}] + 
+   G[{1, 2 - \[Delta], 1, 2, 2, 1, 2, 0, 0}] + 
+   G[{1, 2 - \[Delta], 1, 2, 2, 2, 1, 0, 0}] + 
+   2 G[{1, 2 - \[Delta], 1, 3, 1, 1, 2, 0, 0}] + 
+   4 G[{1, 2 - \[Delta], 1, 3, 1, 2, 1, 0, 0}] + 
+   G[{1, 2 - \[Delta], 2, 2, 1, 1, 2, 0, 0}] + 
+   G[{1, 2 - \[Delta], 2, 2, 1, 2, 1, 0, 0}] + 
+   4 G[{1, 3 - \[Delta], 1, 1, 1, 3, 1, 0, 0}] + 
+   2 G[{1, 3 - \[Delta], 1, 1, 2, 2, 1, 0, 0}] + 
+   4 G[{1, 3 - \[Delta], 1, 2, 1, 2, 1, 0, 0}] + 
+   2 G[{1, 3 - \[Delta], 1, 2, 2, 1, 1, 0, 0}] + 
+   4 G[{1, 3 - \[Delta], 1, 3, 1, 1, 1, 0, 0}] + 
+   2 G[{1, 3 - \[Delta], 2, 1, 1, 2, 1, 0, 0}] + 
+   2 G[{1, 3 - \[Delta], 2, 2, 1, 1, 1, 0, 0}] + 
+   2 G[{2 - \[Delta], 1, 1, 3, 1, 2, 1, 0, 0}] + 
+   G[{2, 2 - \[Delta], 1, 2, 1, 2, 1, 0, 0}] + 
+   G[{2, 2 - \[Delta], 1, 2, 2, 1, 1, 0, 0}] + 
+   2 G[{2, 2 - \[Delta], 1, 3, 1, 1, 1, 0, 0}] + 
+   G[{2, 2 - \[Delta], 2, 2, 1, 1, 1, 0, 0}];
+
+ib1 = mapFIREMB /@ List @@ B1 /. {Repr -> repr, d -> 7 - 2 ep};
+
+rulesb1 = MBcorrectContours[
+    MBoptimizedRules[#, \[Delta] -> 0, {}, {\[Delta], ep}], 10000] & /@ ib1
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[9/2+ep+z1+z2-\[Delta]]
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[4+2 ep+z1-\[Delta]]
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[1/2+ep+z4-\[Delta]]
+
+General::stop: Further output of MBresidues::contour will be suppressed during this calculation. >>
+
+{{{\[Delta] -> -(5/16), ep -> -(23/16)}, {z1 -> -(314183/418916), 
+   z2 -> -(3456503/1675888), z3 -> -(104755/419036), 
+   z4 -> 3666651/1676176}}, {{\[Delta] -> 1/2, 
+   ep -> -(5/4)}, {z1 -> -(104721/837832), z2 -> -(523707/837944), 
+   z3 -> -(314273/419036), z4 -> 733335/838088}}, {{\[Delta] -> 3/8, 
+   ep -> -1}, {z1 -> -(104727/209458), z2 -> -(523711/418972), 
+   z3 -> -(104757/209518), z4 -> 314285/209522}}, {{\[Delta] -> -(11/32), 
+   ep -> -(25/16)}, {z1 -> -(104725/418916), z2 -> -(314213/1675888), 
+   z3 -> -(314261/1676144), z4 -> 104765/419044}}, {{\[Delta] -> -(3/8), 
+   ep -> -(3/2)}, {z1 -> -(104727/209458), z2 -> -(104742/104743), 
+   z3 -> -(314273/419036), z4 -> 523809/419044}}, {{\[Delta] -> -(1/4), 
+   ep -> -(13/8)}, {z1 -> -(104713/1675664), z2 -> -(523699/1675888), 
+   z3 -> -(314269/838072), z4 -> 733343/1676176}}, {{\[Delta] -> -(3/8), 
+   ep -> -(3/2)}, {z1 -> -(104727/209458), z2 -> -(104742/104743), 
+   z3 -> -(104757/209518), z4 -> 523809/419044}}, {{\[Delta] -> 3/16, 
+   ep -> -1}, {z1 -> -(104727/209458), z2 -> -(104735/837944), 
+   z3 -> -(314261/1676144), z4 -> 104765/419044}}, {{\[Delta] -> -(3/4), 
+   ep -> -(3/2)}, {z1 -> -(314183/418916), z2 -> -(733185/1675888), 
+   z3 -> -(314273/419036), z4 -> 1780953/1676176}}, {{\[Delta] -> 1/2, 
+   ep -> -1}, {z1 -> -(104727/209458), z2 -> -(104739/418972), 
+   z3 -> -(523787/838072), z4 -> 314287/419044}}, {{\[Delta] -> -(7/16), 
+   ep -> -(25/16)}, {z1 -> -(104727/209458), z2 -> -(104727/1675888), 
+   z3 -> -(523763/3352288), z4 -> 314299/1676176}}, {{\[Delta] -> -(7/16), 
+   ep -> -(25/16)}, {z1 -> -(104727/209458), z2 -> -(104727/1675888), 
+   z3 -> -(523763/3352288), z4 -> 314299/1676176}}, {{\[Delta] -> -(3/32), 
+   ep -> -(21/16)}, {z1 -> -(104727/209458), z2 -> -(314213/1675888), 
+   z3 -> -(314261/1676144), z4 -> 104765/419044}}, {{\[Delta] -> -(3/16), 
+   ep -> -(11/8)}, {z1 -> -(104727/209458), z2 -> -(104735/837944), 
+   z3 -> -(314261/1676144), z4 -> 104765/419044}}, {{\[Delta] -> -(7/16), 
+   ep -> -(25/16)}, {z1 -> -(104727/209458), z2 -> -(104727/1675888), 
+   z3 -> -(523763/3352288), z4 -> 314299/1676176}}, {{\[Delta] -> 3/16, 
+   ep -> -1}, {z1 -> -(104727/209458), z2 -> -(104735/837944), 
+   z3 -> -(314261/1676144), z4 -> 104765/419044}}, {{\[Delta] -> 3/8, 
+   ep -> -(3/2)}, {z1 -> -(104727/209458), z2 -> -(104742/104743), 
+   z3 -> -(104757/209518), z4 -> 523809/419044}}, {{\[Delta] -> 1/4, 
+   ep -> -(15/16)}, {z1 -> -(104727/209458), z2 -> -(942671/1675888), 
+   z3 -> -(733297/1676144), z4 -> 1361909/1676176}}, {{\[Delta] -> -(19/32), 
+   ep -> -(21/16)}, {z1 -> -(104727/209458), z2 -> -(314213/1675888), 
+   z3 -> -(314261/1676144), z4 -> 104765/419044}}, {{\[Delta] -> -(19/32), 
+   ep -> -(21/16)}, {z1 -> -(104727/209458), z2 -> -(314213/1675888), 
+   z3 -> -(314261/1676144), z4 -> 104765/419044}}, {{\[Delta] -> -(5/16), 
+   ep -> -1}, {z1 -> -(104727/209458), z2 -> -(104735/837944), 
+   z3 -> -(314261/1676144), z4 -> 104765/419044}}, {{\[Delta] -> -(15/64), 
+   ep -> -(37/32)}, {z1 -> -(104727/209458), z2 -> -(4084945/3351776), 
+   z3 -> -(733297/1676144), z4 -> 4714277/3352352}}}
+
+ints = Table[
+   MBmerge[MBexpand[
+      MBcontinue[#[[1]], ep -> 0, #[[2]], 
+         Verbose -> False] & /@ (MBexpand[
+          MBcontinue[ib1[[ii]], \[Delta] -> 0, rulesb1[[ii]], 
+           Verbose -> False], 1, {\[Delta], 0, 0}] // MBmerge), 
+      1, {ep, 0, 0}]] // MBmerge, {ii, 1, Length[ib1]}];
+
+res = {};
+
+Monitor[For[ii = 1, ii <= Length[ints], ii++, 
+  AppendTo[res, MBintegrate[ints[[ii]], {y -> 0.32}, Verbose -> False]]], ii]
+
+
+res
+
+{{-0.221896 + 0.286343/ep^2 + 10.5461/ep, {0.0000285737, 0}}, {-85.5972 + 
+   10.2265/ep^2 - 0.91673/ep, {0.0249519 + 0.003355/ep, 0}}, {33.1866 - 
+   8.50848/ep, {0.000499031, 0}}, {33829.2 + 46.0194/ep^2 + 37.7922/
+   ep, {39901.7 + 0.000207318/ep, 0}}, {-85.0869 + 10.2265/ep^2 - 0.916714/
+   ep, {0.14154, 0}}, {3.82295 - 46.0194/ep^2 + 30.8193/
+   ep, {17.6386 + 0.00117813/ep, 0}}, {30.2918 - 7.52673/ep^2 + 42.6739/
+   ep, {0.000513279, 0}}, {118.375 + 23.42739010687634/ep, {0.014782, 
+   0}}, {-42.0356 + 1.63625/ep^2 + 2.01317/ep, {0.00089168, 0}}, {-0.251888 + 
+   0.286343/ep^2 + 10.5459/ep, {0.0534945 + 0.000829652/ep, 0}}, {-81.5079 + 
+   5.113269292952297/ep^2 - 36.2513/ep, {0.00308973 + 0.000236895/ep, 
+   0}}, {30.2933 - 7.52673/ep^2 + 42.6738/ep, {0.0122127 + 0.0018557/ep, 
+   0}}, {58.976 - 46.0194/ep^2 + 30.8192/ep, {0.0059533 + 0.00040424/ep, 
+   0}}, {261.566 + 39.6381/ep^2 - 124.038/ep, {0.0063907 + 0.00127906/ep, 
+   0}}, {-0.791025 - 1.63625/ep^2 + 1.25932/ep, {0.00366129 + 0.0000585868/ep,
+    0}}, {-40.8186 - 4.908738521234205/ep^2 - 16.3769/
+   ep, {0.010321 + 0.0000306595/ep, 0}}, {-81.508 + 5.11327/ep^2 - 36.2512/
+   ep, {0.000503603, 0}}, {-42.0364 + 1.636246173744686/ep^2 + 2.01317/
+   ep, {0.00438744 + 0.00151609/ep, 0}}, {118.384 + 23.4274/
+   ep, {0.0104232 + 0.000573559/ep, 0}}, {-40.8091 - 4.90874/ep^2 - 16.3769/
+   ep, {0.00756434 + 0.00106903/ep, 0}}, {38.4654, {0.0155241, 
+   0}}, {-0.792903 - 1.63625/ep^2 + 1.25932/ep, {0.000835793, 0}}}
+
+ib1 [[4]] /. \[Delta] -> 0
+
+(y^z1 Gamma[-z1] Gamma[
+    2 + z1] Gamma[-(3/2) - ep - z1 - z2] Gamma[-(1/2) - ep + 
+     z2] Gamma[-(1/2) - ep - z1 - z3] Gamma[1/2 - ep + z3] Gamma[
+    1 + z1 - z4] Gamma[5/2 + ep + z1 - z4] Gamma[-z2 - z3 - z4] Gamma[
+    3/2 + ep + z4] Gamma[z2 + z4] Gamma[z3 + z4] Gamma[
+    2 + z1 + z2 + z3 + z4])/(Gamma[1 - 2 ep] Gamma[2 - 2 ep + z1 - z4] Gamma[
+    1 + z2 + z4] Gamma[2 + z3 + z4])
+
+rulesb14 = MBoptimizedRules[ib1[[4]] /. \[Delta] -> 0, ep -> 0, {}, {ep}]
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[-(3/2)-ep-z1+z4]
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+General::stop: Further output of MBrules::norules will be suppressed during this calculation. >>
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[-(1/2)-ep+z2]
+
+{{ep -> -(23/16)}, {z1 -> -(1/16), z2 -> -(3/4), z3 -> -(5/8), z4 -> 13/16}}
+
+resb14 = MBmerge[
+   MBexpand[MBcontinue[ib1[[4]] /. \[Delta] -> 0, ep -> 0, rulesb14, 
+     Verbose -> False], 1, {ep, 0, 0}]];
+
+num4 = MBintegrate[resb14, {y -> 0.32}, Verbose -> False]
+
+{-192.136 + 46.0194/ep^2 + 37.7922/ep, {0.0116388 + 0.000409076/ep, 0}}
+
+ib1 [[5]] /. \[Delta] -> 0
+
+(y^z1 Gamma[-z1] Gamma[1 + z1] Gamma[-(5/2) - ep - z1 - z2] Gamma[
+    1/2 - ep + z2] Gamma[-(3/2) - ep - z1 - z3] Gamma[3/2 - ep + z3] Gamma[
+    2 + z1 - z4] Gamma[7/2 + ep + z1 - z4] Gamma[-z2 - z3 - z4] Gamma[
+    1/2 + ep + z4] Gamma[z2 + z4] Gamma[z3 + z4] Gamma[
+    2 + z1 + z2 + z3 + z4])/(Gamma[-2 ep] Gamma[3 - 2 ep + z1 - z4] Gamma[
+    1 + z2 + z4] Gamma[2 + z3 + z4])
+
+rulesb15 = MBoptimizedRules[ib1[[5]] /. \[Delta] -> 0, ep -> 0, {}, {ep}]
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+General::stop: Further output of MBrules::norules will be suppressed during this calculation. >>
+
+{{ep -> -(23/16)}, {z1 -> -(7/8), z2 -> -(1/4), z3 -> -(27/32), z4 -> 31/32}}
+
+resb15 = MBmerge[
+   MBexpand[MBcontinue[ib1[[5]] /. \[Delta] -> 0, ep -> 0, rulesb15, 
+     Verbose -> False], 1, {ep, 0, 0}]];
+
+num5 = MBintegrate[resb15, {y -> 0.32}, Verbose -> False]
+
+{-85.5987 + 10.2265/ep^2 - 0.916714/ep, {0.00413914, 0}}
+
+ib1 [[6]] /. \[Delta] -> 0
+
+(y^z1 Gamma[-z1] Gamma[
+    2 + z1] Gamma[-(3/2) - ep - z1 - z2] Gamma[-(1/2) - ep + z2] Gamma[
+    1/2 - ep - z1 - z3] Gamma[1/2 - ep + z3] Gamma[1 + z1 - z4] Gamma[
+    5/2 + ep + z1 - z4] Gamma[-z2 - z3 - z4] Gamma[3/2 + ep + z4] Gamma[
+    z2 + z4] Gamma[z3 + z4] Gamma[1 + z1 + z2 + z3 + z4])/(Gamma[
+    1 - 2 ep] Gamma[2 - 2 ep + z1 - z4] Gamma[1 + z2 + z4] Gamma[2 + z3 + z4])
+
+rulesb16 = MBoptimizedRules[ib1[[6]] /. \[Delta] -> 0, ep -> 0, {}, {ep}]
+
+MBresidues::contour: contour starts and/or ends on a pole of Gamma[-(3/2)-ep-z1+z4]
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+General::stop: Further output of MBrules::norules will be suppressed during this calculation. >>
+
+{{ep -> -(23/16)}, {z1 -> -(1/32), z2 -> -(13/16), z3 -> -(3/32), 
+  z4 -> 27/32}}
+
+resb16 = MBmerge[
+   MBexpand[MBcontinue[ib1[[6]] /. \[Delta] -> 0, ep -> 0, rulesb16, 
+     Verbose -> False], 1, {ep, 0, 0}]];
+
+num6 = MBintegrate[resb16, {y -> 0.32}, Verbose -> False]
+
+{58.97 - 46.0194/ep^2 + 30.8193/ep, {0.00305687 + 0.0000119/ep, 0}}
+
+
+Plus @@ (Append[Append[Append[Drop[res, {4, 6}], num6], num5], num4])
+
+{54.4037 - 5.86198*10^-12/ep^2 + 19.6342/ep, {0.194863 + 0.0116295/ep, 0}}
+
+s^(4 + 2 \[Epsilon]) E^(-2 \[Epsilon] EulerGamma) (
+SeriesData[\[Epsilon], 
+       0, {(2 Pi) (s^(-3)/t), ((((-2) Pi) s^(-3)) t^(-2)) (
+         s - (2 t) (1 + Log[4]) + (2 t) Log[t])}, -1, 1, 1]) /. t -> y s // 
+   FullSimplify // PowerExpand // ExpandAll
+% /. y -> 0.32
+
+SeriesData[\[Epsilon], 0, {
+ 2 (Pi/y), ((-2) Pi) y^(-2) + 4 (Pi/y) - (4 EulerGamma) (
+   Pi/y) + ((8 Pi)/y) Log[2] - ((4 Pi)/y) Log[y]}, -1, 1, 1]
+
+SeriesData[\[Epsilon], 0, {19.634954084936208`, 54.42860242355326}, -1, 1, 1]
+
+Numerical check of A4-OK
+
+A4 = G[{0, 1, \[Delta], 1, 1, 1, 1, 0, 0}];
+
+
+ia4 = mapFIREMB[A4] /. {Repr -> repr, d -> 3 - 2 ep};
+
+rulesa4 = MBcorrectContours[
+  MBoptimizedRules[ia4, \[Delta] -> 0, {}, {\[Delta], ep}], 10000]
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+MBrules::norules: no rules could be found to regulate this integral
+
+General::stop: Further output of MBrules::norules will be suppressed during this calculation. >>
+
+{{\[Delta] -> 1/2, ep -> -(151/192)}, {z1 -> -(104727/209458), 
+  z2 -> -(4922729/20110656), z3 -> -(1780711/20113728), 
+  z4 -> 3038165/10057056}}
+
+ints = MBmerge[
+    MBexpand[MBcontinue[#[[1]], ep -> 0, #[[2]], 
+        Verbose -> False] & /@ (MBexpand[
+         MBcontinue[ia4, \[Delta] -> 0, rulesa4, Verbose -> False], 
+         1, {\[Delta], 0, 0}] // MBmerge), 1, {ep, 0, 0}]] // MBapplyBarnes //
+   MBmerge
+
+{MBint[(\[Pi] (-8 + PolyGamma[0, -(1/2)] - 2 PolyGamma[0, 1/2] + 
+     PolyGamma[0, 3/2]))/(2 y^2), {{\[Delta] -> 0, ep -> 0}, {}}]}
+
+MBintegrate[ints, {y -> 0.32}, Verbose -> False]
+Plus @@ %
+
+{-61.3592, 0}
+
+-61.3592
+
+ints[[1, 1]] // FullSimplify
+
+-((2 \[Pi])/y^2)
