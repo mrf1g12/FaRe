@@ -4,8 +4,8 @@ SetDirectory[NotebookDirectory[]]; (* Be sure that FaRe.m is in the NotebookDire
 
 << FaRe.m
 
-
-Compute Dirac traces
+(*°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*)
+(* Compute Dirac traces *)
 
 K = DiracSlash[k]
 P = DiracSlash[p]
@@ -17,8 +17,8 @@ DiracTrace[Mu, K, Nu, K + P]
 tra = Tr[Mu.K.Nu.(K - P)] /. {mu -> "m1", nu -> "m2", p -> "p"}
 
 
-
-Tensor reduction of vector integral
+(*°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*)
+(* Tensor reduction of vector integral *)
 
 e1 = TRed[4, {k}, {{k, 1}, {k - p, 1}}, {k}]
 
@@ -26,7 +26,8 @@ e1 = TRed[4, {k}, {{k, 1}, {k - p, 1}}, {k}]
 
 fe1[x_] := e1 /. {"m1" -> x}
 
-Tensor reduction of tensor integral
+
+(* Tensor reduction of tensor integral *)
 
 e2 = TRed[4, {k, k}, {{k, 1}, {k - p, 1}}, {k}]
 
@@ -35,7 +36,8 @@ e2 = TRed[4, {k, k}, {{k, 1}, {k - p, 1}}, {k}]
 tkk = Contract[MetricTensor["m1", "m2", Dimension -> dim], 
   ChangeDimension[e2, dim]]
 
-Replace integrals in the trace expression
+(*°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*)
+(* Replace integrals in the trace expression *)
 
 tra1 = tra /. {(Pair[LorentzIndex["m1"], Momentum[k]] Pair[LorentzIndex["m2"],
         Momentum[k]]) -> e2}
@@ -59,7 +61,8 @@ RowBox[{"1", ",", "1"}], "}"}],"6"},
 "Subsuperscript"],
 TraditionalForm]\)]
 
-Analytical expression of the scalar integral Subsuperscript[I, {1,n1}, D]
+(*°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*)
+(* Analytical expression of the scalar integral Subsuperscript[I, {1,n1}, D] *)
 
 rr[DD_, n2_] := (-1)^(n2 + 1) Gamma[n2 + 1 - DD/2]/
    Gamma[n2] y^(n2 - 1) ScalarProduct["p", 
@@ -77,6 +80,7 @@ Replace dimension with regulator \epsilon
 
 tra5b = tra5 /. {dim -> 4 - 2 e}
 
-Final result. With trivial manipulation the usual form is recovered.
+(*°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*)
+(* Final result. With trivial manipulation the usual form is recovered. *)
 
 FullSimplify[tra5b]
